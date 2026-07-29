@@ -1,85 +1,62 @@
-# Sistem Otomasi Transkrip & Ijazah
+# Transkrip & Ijazah
 
-Aplikasi web Django internal untuk generate Transkrip Akademik mahasiswa secara otomatis dari data Neo Feeder PDDIKTI. Output file Excel siap cetak, read-only terhadap Neo Feeder.
-
-## Run & Operate
-
-- `bash artifacts/transkrip-app/run.sh` — jalankan Django dev server (port 8000)
-- Login default: **admin / admin123** (ganti segera via Admin Panel)
-- Admin Panel: `/admin/`
+Aplikasi web Django untuk generate transkrip akademik mahasiswa dari Neo Feeder PDDIKTI.
 
 ## Stack
 
-- Python 3.11 + Django 5.2
-- Database: SQLite (`artifacts/transkrip-app/db.sqlite3`)
-- Excel: openpyxl 3.1
-- HTTP client: requests (Neo Feeder)
-- Frontend: Django Templates + Bootstrap 5.3
+- **Backend**: Django 5.2 (Python)
+- **Database**: SQLite (`artifacts/transkrip-app/db.sqlite3`)
+- **Frontend**: Template HTML + Tailwind CSS + Vite (dibangun sebagai static files)
+- **External**: Neo Feeder PDDIKTI (server lokal kampus, port 3003)
 
-## Konfigurasi Neo Feeder
+## Cara Menjalankan
 
-Kredensial disimpan sebagai **Replit Secrets & Env Vars** (bukan file `.env`):
+Workflow: **artifacts/transkrip-app: web**
+Script: `bash /home/runner/workspace/artifacts/transkrip-app/run.sh`
+
+`run.sh` otomatis menjalankan migrasi DB, membuat superuser default, lalu menjalankan Django dev server.
+
+## Environment Variables / Secrets
 
 | Key | Jenis | Keterangan |
 |---|---|---|
 | `SECRET_KEY` | Secret | Django secret key |
-| `FEEDER_PASSWORD` | Secret | Password Neo Feeder |
-| `FEEDER_HOST` | Env Var | IP/hostname server Neo Feeder |
-| `FEEDER_USERNAME` | Env Var | Username Neo Feeder |
-| `DEFAULT_NAMA_DEKAN` | Env Var | Nama dekan default di transkrip |
 | `DEBUG` | Env Var | `True` untuk development |
+| `ALLOWED_HOSTS` | Env Var | Host yang diizinkan |
+| `FEEDER_HOST` | Secret | IP server Neo Feeder kampus |
+| `FEEDER_USERNAME` | Secret | Username Neo Feeder |
+| `FEEDER_PASSWORD` | Secret | Password Neo Feeder |
+| `DEFAULT_NAMA_DEKAN` | Env Var | Nama dekan default di transkrip |
 
-Untuk mengubah nilai, gunakan tab **Secrets** di Replit.
+## Akun Default
 
-## Where things live
+- **Username**: `admin`
+- **Password**: `admin123`
+- Ganti password via: `python manage.py changepassword admin`
+
+## Struktur Aplikasi
 
 ```
 artifacts/transkrip-app/
-├── manage.py
-├── run.sh                        # Entry point workflow
-├── .env.example                  # Template konfigurasi
-├── transkrip_project/            # Django project settings, urls, wsgi
-├── core/
-│   ├── models.py                 # Semua model (Kurikulum, Template, dll)
-│   ├── admin.py                  # Admin + upload Excel kurikulum
-│   ├── views.py                  # Views: dashboard, single, batch, riwayat
-│   ├── forms.py
-│   ├── urls.py
-│   ├── migrations/
-│   └── services/
-│       ├── feeder.py             # Integrasi Neo Feeder (read-only)
-│       ├── matching.py           # Logika pencocokan + hitung IPK/predikat
-│       └── excel_gen.py          # Generator Excel output
-└── templates/                    # HTML templates (Django + Bootstrap)
+├── core/               # Django app utama (models, views, services)
+├── transkrip_project/  # Settings & URL config Django
+├── templates/          # HTML templates
+├── static/             # Static files (CSS, JS)
+├── media/              # Upload files (template Excel) — tidak di-git
+├── db.sqlite3          # Database SQLite
+├── requirements.txt    # Python dependencies
+└── run.sh              # Entry point
 ```
 
-## Architecture decisions
+## Fitur Utama
 
-- Token JWT Neo Feeder di-cache in-memory dengan auto-refresh proaktif 5 menit sebelum `exp`
-- Neo Feeder: HANYA `GetToken`, `GetBiodataMahasiswa`, `GetNilaiPerkuliahanMahasiswa` — tidak ada Insert/Update/Delete
-- Pencocokan MK: retake → ambil mutu tertinggi (kuning), kosong → tandai merah, tak dikenali → sheet laporan (oranye)
-- IPK dihitung ulang dari data nilai final setelah dedup retake: Σ(SKS×Bobot)/ΣSKS
-- Template Excel diisi via `cell_mapping` JSON — tidak membuat layout baru, isi ke template asli
-- Batch Excel dikelompokkan per (jenjang, angkatan), page break per mahasiswa
+- **Generate Single**: Buat transkrip satu mahasiswa berdasarkan NIM
+- **Generate Batch**: Upload daftar NIM, generate massal
+- **Riwayat**: Log semua generate dengan filter
+- **Django Admin** (`/admin/`): Setup kurikulum, template Excel, predikat kelulusan
 
-## Workflow Generate
+## Catatan
 
-1. **Setup admin**: Upload Template Excel + isi `cell_mapping` → Admin → Templates
-2. **Upload kurikulum**: Admin → Kurikulum → Upload Excel Kurikulum → pilih jenjang/angkatan/template
-3. **Data pendukung**: Admin → Data Pendukung → isi NIM, No. Ijazah, Judul Skripsi
-4. **Predikat kelulusan**: Admin → Predikat Kelulusan → isi aturan IPK per tahun
-5. **Generate single**: Menu Generate Single → input NIM → download xlsx
-6. **Generate batch**: Menu Generate Batch → upload file NIM → download xlsx per angkatan
-
-## User preferences
-
-- Aplikasi lokal, single-user, bahasa Indonesia
-- Django dengan SQLite (tidak perlu PostgreSQL)
-- Output Excel pakai template asli user, bukan layout baru
-
-## Gotchas
-
-- `cell_mapping` di Template harus diisi manual setelah file template asli diperiksa struktur cell-nya
-- Field names dari `GetBiodataMahasiswa` berbeda antar versi Neo Feeder — lihat `services/matching.py` fungsi `parse_biodata()` untuk normalisasi
-- Jenjang dari Feeder bisa berupa kode angka ('3') atau nama lengkap ('DIPLOMA TIGA') — dinormalisasi di `views.py` `_proses_satu_nim()`
-- Jalankan selalu dari root project: `bash artifacts/transkrip-app/run.sh`
+- Neo Feeder harus terhubung ke jaringan intranet/VPN kampus
+- Aplikasi tetap bisa diakses tanpa Feeder; hanya fitur generate yang tidak aktif
+- Token Feeder di-cache in-memory, auto-refresh 5 menit sebelum expired
