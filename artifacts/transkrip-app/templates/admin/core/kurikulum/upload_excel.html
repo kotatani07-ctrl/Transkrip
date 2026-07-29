@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Upload Excel Kurikulum{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px;">
+  <h1>Upload Excel Kurikulum</h1>
+  <p class="help">
+    Upload file Excel kurikulum. Sistem akan otomatis mendeteksi kolom
+    <strong>Kode MK</strong>, <strong>Mata Kuliah</strong>, dan <strong>SKS</strong>,
+    lalu menyimpan dan mengurutkan secara alfabetis berdasarkan nama mata kuliah.
+  </p>
+
+  {% if messages %}
+  <ul class="messagelist">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      <h2>Data Kurikulum</h2>
+
+      <div class="form-row">
+        <label for="id_jenjang">Jenjang:*</label>
+        <select name="jenjang" id="id_jenjang" required>
+          <option value="">--- Pilih Jenjang ---</option>
+          <option value="D3">D3</option>
+          <option value="S1">S1</option>
+        </select>
+        <p class="help">Jenjang pendidikan untuk kurikulum ini</p>
+      </div>
+
+      <div class="form-row">
+        <label for="id_angkatan">Angkatan:*</label>
+        <input type="number" name="angkatan" id="id_angkatan"
+               placeholder="Misal: 2020" min="2000" max="2050" required>
+        <p class="help">Tahun angkatan mahasiswa</p>
+      </div>
+
+      <div class="form-row">
+        <label for="id_template">Template Excel:</label>
+        <select name="template" id="id_template">
+          <option value="">--- (opsional) ---</option>
+          {% for t in templates %}
+          <option value="{{ t.pk }}">{{ t.nama }}</option>
+          {% endfor %}
+        </select>
+        <p class="help">Template Excel untuk generate transkrip angkatan ini</p>
+      </div>
+    </fieldset>
+
+    <fieldset class="module aligned">
+      <h2>File Kurikulum</h2>
+      {% for field in form %}
+      <div class="form-row">
+        <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+        {{ field }}
+        {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+        {% for error in field.errors %}<p class="errornote">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+    </fieldset>
+
+    <div class="submit-row">
+      <input type="submit" value="Upload &amp; Import" class="default">
+      <a href="../" class="closelink">Batal</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

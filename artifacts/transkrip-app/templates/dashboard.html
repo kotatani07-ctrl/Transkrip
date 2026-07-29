@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Transkrip & Ijazah{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Status bar konfigurasi -->
+{% if not feeder_configured %}
+<div class="alert alert-warning d-flex align-items-center gap-2 mb-4 py-2" role="alert">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>
+    <strong>Konfigurasi Neo Feeder belum lengkap.</strong>
+    Salin <code>.env.example</code> ke <code>.env</code> dan isi <code>FEEDER_HOST</code>,
+    <code>FEEDER_USERNAME</code>, <code>FEEDER_PASSWORD</code>.
+  </div>
+</div>
+{% else %}
+<div class="alert alert-success d-flex align-items-center gap-2 mb-4 py-2" role="alert">
+  <i class="bi bi-check-circle-fill"></i>
+  <div>Terhubung ke Neo Feeder: <strong>{{ feeder_host }}</strong></div>
+</div>
+{% endif %}
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-4">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="stat-icon" style="background:#dbeafe;">
+        <i class="bi bi-journal-bookmark-fill text-primary"></i>
+      </div>
+      <div>
+        <div style="font-size:1.6rem;font-weight:700;line-height:1;">{{ total_kurikulum }}</div>
+        <div class="text-muted small">Kurikulum Terdaftar</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="stat-icon" style="background:#dcfce7;">
+        <i class="bi bi-file-earmark-spreadsheet-fill" style="color:#16a34a"></i>
+      </div>
+      <div>
+        <div style="font-size:1.6rem;font-weight:700;line-height:1;">{{ total_template }}</div>
+        <div class="text-muted small">Template Excel</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card d-flex align-items-center gap-3">
+      <div class="stat-icon" style="background:#fef3c7;">
+        <i class="bi bi-clock-history" style="color:#d97706"></i>
+      </div>
+      <div>
+        <div style="font-size:1.6rem;font-weight:700;line-height:1;">{{ total_riwayat }}</div>
+        <div class="text-muted small">Total Generate</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-person-vcard text-primary"></i>
+        <span class="fw-semibold">Generate Single</span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Masukkan 1 NIM mahasiswa untuk generate transkrip secara langsung.
+          Hasil langsung diunduh sebagai file Excel.
+        </p>
+        <a href="{% url 'generate_single' %}" class="btn btn-primary btn-sm">
+          <i class="bi bi-play-fill me-1"></i> Mulai Generate
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-people text-success"></i>
+        <span class="fw-semibold">Generate Batch</span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Upload file .txt/.csv/.xlsx berisi daftar NIM.
+          Hasil dikompilasi dalam satu file Excel per angkatan.
+        </p>
+        <a href="{% url 'generate_batch' %}" class="btn btn-success btn-sm">
+          <i class="bi bi-upload me-1"></i> Upload File NIM
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Riwayat terakhir -->
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-clock-history text-warning"></i>
+      <span class="fw-semibold">Riwayat Generate Terakhir</span>
+    </div>
+    <a href="{% url 'riwayat' %}" class="btn btn-outline-secondary btn-sm">Lihat Semua</a>
+  </div>
+  <div class="card-body p-0">
+    {% if riwayat_terakhir %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>NIM</th>
+            <th>Nama</th>
+            <th>Jenjang</th>
+            <th>Angkatan</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Waktu</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in riwayat_terakhir %}
+          <tr>
+            <td class="font-monospace">{{ r.nim }}</td>
+            <td>{{ r.nama_mahasiswa|default:"-" }}</td>
+            <td>{{ r.jenjang|default:"-" }}</td>
+            <td>{{ r.angkatan|default:"-" }}</td>
+            <td>
+              <span class="badge bg-secondary bg-opacity-10 text-dark">{{ r.mode }}</span>
+            </td>
+            <td>
+              {% if r.status == 'success' %}
+              <span class="badge bg-success">Berhasil</span>
+              {% else %}
+              <span class="badge bg-danger" title="{{ r.error_message }}">Error</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ r.generated_at|date:"d/m/Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+      Belum ada riwayat generate.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

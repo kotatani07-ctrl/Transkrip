@@ -1,0 +1,67 @@
+from django import forms
+
+
+class GenerateSingleForm(forms.Form):
+    nim = forms.CharField(
+        max_length=20,
+        label="NIM Mahasiswa",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Masukkan NIM mahasiswa...',
+            'autofocus': True,
+        })
+    )
+
+
+class GenerateBatchForm(forms.Form):
+    FILE_CHOICES = [
+        ('auto', 'Deteksi otomatis'),
+        ('txt', 'Text (.txt) — satu NIM per baris'),
+        ('csv', 'CSV (.csv) — kolom pertama NIM'),
+        ('xlsx', 'Excel (.xlsx)'),
+    ]
+
+    file_nim = forms.FileField(
+        label="File Daftar NIM",
+        help_text="Format: .txt (satu NIM per baris), .csv (kolom pertama NIM), atau .xlsx (kolom pertama NIM).",
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.txt,.csv,.xlsx'})
+    )
+
+    def clean_file_nim(self):
+        f = self.cleaned_data['file_nim']
+        name = f.name.lower()
+        if not (name.endswith('.txt') or name.endswith('.csv') or name.endswith('.xlsx')):
+            raise forms.ValidationError(
+                "Format file tidak didukung. Gunakan .txt, .csv, atau .xlsx."
+            )
+        return f
+
+
+class RiwayatFilterForm(forms.Form):
+    tanggal_mulai = forms.DateField(
+        required=False,
+        label="Dari Tanggal",
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    tanggal_selesai = forms.DateField(
+        required=False,
+        label="Sampai Tanggal",
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    angkatan = forms.IntegerField(
+        required=False,
+        label="Angkatan",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Misal: 2020'})
+    )
+    status = forms.ChoiceField(
+        required=False,
+        label="Status",
+        choices=[('', 'Semua'), ('success', 'Berhasil'), ('error', 'Error')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    jenjang = forms.ChoiceField(
+        required=False,
+        label="Jenjang",
+        choices=[('', 'Semua'), ('D3', 'D3'), ('S1', 'S1')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )

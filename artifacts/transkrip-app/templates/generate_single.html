@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Generate Single — Transkrip{% endblock %}
+{% block page_title %}Generate Transkrip — Single NIM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-person-vcard text-primary"></i>
+        <span class="fw-semibold">Input NIM Mahasiswa</span>
+      </div>
+      <div class="card-body p-4">
+        <p class="text-muted small mb-4">
+          Masukkan satu NIM mahasiswa. Sistem akan mengambil data dari Neo Feeder PDDIKTI,
+          mencocokkan dengan kurikulum yang tersimpan, lalu menghasilkan file Excel transkrip.
+        </p>
+
+        <form method="post" id="generateForm">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="form-label">{{ form.nim.label }}</label>
+            {{ form.nim }}
+            {% if form.nim.errors %}
+            <div class="text-danger small mt-1">{{ form.nim.errors }}</div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+            <i class="bi bi-download me-2"></i>Generate & Unduh Excel
+          </button>
+        </form>
+
+        <div id="loadingIndicator" class="text-center py-4 d-none">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <p class="text-muted small mb-0">Mengambil data dari Neo Feeder &amp; memproses...</p>
+          <p class="text-muted" style="font-size:.75rem">Harap tunggu, proses mungkin membutuhkan beberapa detik.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Petunjuk -->
+    <div class="card mt-3">
+      <div class="card-header fw-semibold small">
+        <i class="bi bi-info-circle text-info me-1"></i>Keterangan Warna Output Excel
+      </div>
+      <div class="card-body py-3">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <div style="width:20px;height:20px;background:#fef9c3;border:1px solid #ddd;border-radius:3px;flex-shrink:0;"></div>
+            <span class="small"><strong>Kuning</strong> — MK diulang (retake), diambil nilai/mutu tertinggi</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div style="width:20px;height:20px;background:#fee2e2;border:1px solid #ddd;border-radius:3px;flex-shrink:0;"></div>
+            <span class="small"><strong>Merah</strong> — MK ada di kurikulum tapi belum ada nilai dari API</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div style="width:20px;height:20px;background:#ffedd5;border:1px solid #ddd;border-radius:3px;flex-shrink:0;"></div>
+            <span class="small"><strong>Oranye</strong> — Kode MK dari API tidak dikenali kurikulum (masuk Sheet Laporan)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prasyarat -->
+    <div class="card mt-3">
+      <div class="card-header fw-semibold small">
+        <i class="bi bi-clipboard-check text-success me-1"></i>Prasyarat Sebelum Generate
+      </div>
+      <div class="card-body py-3">
+        <ol class="small text-muted mb-0 ps-3">
+          <li>Kurikulum (Jenjang + Angkatan) mahasiswa sudah diinput di <a href="/admin/core/kurikulum/" target="_blank">Admin → Kurikulum</a></li>
+          <li>Template Excel sudah diupload dan dikonfigurasi <code>cell_mapping</code>-nya</li>
+          <li>Data Pendukung (No. Ijazah, Judul Skripsi) mahasiswa tersedia opsional</li>
+          <li>Koneksi ke Neo Feeder aktif</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('generateForm').addEventListener('submit', function() {
+  document.getElementById('submitBtn').classList.add('d-none');
+  document.getElementById('loadingIndicator').classList.remove('d-none');
+});
+</script>
+{% endblock %}

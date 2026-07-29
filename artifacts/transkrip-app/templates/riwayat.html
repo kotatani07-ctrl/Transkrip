@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Riwayat Generate — Transkrip{% endblock %}
+{% block page_title %}Riwayat Generate{% endblock %}
+
+{% block content %}
+<!-- Stat summary -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-4">
+    <div class="stat-card text-center">
+      <div style="font-size:1.8rem;font-weight:700;color:#1a5276;">{{ total }}</div>
+      <div class="text-muted small">Total Hasil Filter</div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card text-center">
+      <div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{{ berhasil }}</div>
+      <div class="text-muted small">Berhasil</div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card text-center">
+      <div style="font-size:1.8rem;font-weight:700;color:#dc2626;">{{ error }}</div>
+      <div class="text-muted small">Error</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter form -->
+<div class="card mb-4">
+  <div class="card-header fw-semibold small d-flex align-items-center gap-2">
+    <i class="bi bi-funnel"></i>Filter
+  </div>
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-sm-2">
+        <label class="form-label small">{{ form.jenjang.label }}</label>
+        {{ form.jenjang }}
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label small">{{ form.angkatan.label }}</label>
+        {{ form.angkatan }}
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label small">{{ form.status.label }}</label>
+        {{ form.status }}
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label small">{{ form.tanggal_mulai.label }}</label>
+        {{ form.tanggal_mulai }}
+      </div>
+      <div class="col-sm-2">
+        <label class="form-label small">{{ form.tanggal_selesai.label }}</label>
+        {{ form.tanggal_selesai }}
+      </div>
+      <div class="col-sm-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-fill">
+          <i class="bi bi-search me-1"></i>Filter
+        </button>
+        <a href="{% url 'riwayat' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-x"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabel riwayat -->
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span class="fw-semibold"><i class="bi bi-table me-2"></i>Daftar Riwayat</span>
+    <span class="text-muted small">Menampilkan maks. 200 baris</span>
+  </div>
+  <div class="card-body p-0">
+    {% if riwayat_list %}
+    <div class="table-responsive">
+      <table class="table table-hover table-sm mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Waktu</th>
+            <th>NIM</th>
+            <th>Nama</th>
+            <th>Jenjang</th>
+            <th>Angkatan</th>
+            <th>Mode</th>
+            <th>MK Kosong</th>
+            <th>MK Retake</th>
+            <th>Tak Dikenal</th>
+            <th>Status</th>
+            <th>User</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in riwayat_list %}
+          <tr class="{% if r.status == 'error' %}table-danger{% endif %}">
+            <td class="text-nowrap small text-muted">{{ r.generated_at|date:"d/m/Y H:i" }}</td>
+            <td class="font-monospace small">{{ r.nim }}</td>
+            <td class="small">{{ r.nama_mahasiswa|default:"—" }}</td>
+            <td>
+              {% if r.jenjang %}
+              <span class="badge bg-secondary bg-opacity-10 text-dark">{{ r.jenjang }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="small">{{ r.angkatan|default:"—" }}</td>
+            <td>
+              <span class="badge {% if r.mode == 'batch' %}bg-info{% else %}bg-secondary{% endif %} bg-opacity-15 text-dark small">
+                {{ r.mode }}
+              </span>
+            </td>
+            <td>
+              {% if r.jumlah_mk_kosong > 0 %}
+              <span class="badge badge-kosong">{{ r.jumlah_mk_kosong }}</span>
+              {% else %}
+              <span class="text-muted small">0</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.jumlah_mk_retake > 0 %}
+              <span class="badge badge-retake">{{ r.jumlah_mk_retake }}</span>
+              {% else %}
+              <span class="text-muted small">0</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.jumlah_mk_tidak_dikenali > 0 %}
+              <span class="badge badge-unknown">{{ r.jumlah_mk_tidak_dikenali }}</span>
+              {% else %}
+              <span class="text-muted small">0</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.status == 'success' %}
+              <span class="badge bg-success">OK</span>
+              {% else %}
+              <span class="badge bg-danger" title="{{ r.error_message|default:'' }}">Error</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ r.generated_by.username|default:"—" }}</td>
+          </tr>
+          {% if r.status == 'error' and r.error_message %}
+          <tr class="table-danger">
+            <td colspan="11" class="small text-danger py-1 ps-4">
+              <i class="bi bi-exclamation-triangle me-1"></i>{{ r.error_message }}
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+      <p>Tidak ada riwayat yang cocok dengan filter.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
