@@ -1088,6 +1088,85 @@ input[type="checkbox"] {
     margin-bottom: 4px !important;
     display: block !important;
   }
+
+  /* ── Change-form: restore fieldset glass-card (explicit, wins over preflight) ── */
+  fieldset {
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-lg) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--blur-sm) !important;
+    -webkit-backdrop-filter: var(--blur-sm) !important;
+    box-shadow: var(--glass-shadow) !important;
+    margin-bottom: 16px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* ── Restore .module glass-card on mobile ── */
+  .module {
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-lg) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--blur-sm) !important;
+    -webkit-backdrop-filter: var(--blur-sm) !important;
+    box-shadow: var(--glass-shadow) !important;
+    overflow: hidden !important;
+  }
+
+  /* ── Restore form-row border separator ── */
+  .form-row {
+    display: block !important;
+    border-bottom: 1px solid var(--glass-border-soft) !important;
+  }
+  .form-row:last-child { border-bottom: none !important; }
+
+  /* ── Unstack .aligned label floats (Django admin change_form) ──
+     Django's forms.css sets: label { float:left; width:8em; }
+     Tailwind preflight doesn't cause this — Django does — must override. */
+  .aligned label,
+  .form-row .aligned label,
+  fieldset.aligned label,
+  fieldset .form-row label {
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    padding-top: 0 !important;
+    display: block !important;
+    margin-bottom: 5px !important;
+  }
+
+  /* Remove left-padding Django adds to offset float-width elements */
+  .aligned div.help,
+  .aligned p.help,
+  .aligned .help,
+  .field-box .help {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    margin-top: 4px !important;
+  }
+
+  /* Related widget wrapper (FK lookup buttons) also floats — reset */
+  .related-widget-wrapper {
+    float: none !important;
+    overflow: visible !important;
+    margin-left: 0 !important;
+  }
+
+  /* Scoped width 100% for inputs inside form-row (belt + suspenders) */
+  .form-row input[type="text"],
+  .form-row input[type="password"],
+  .form-row input[type="email"],
+  .form-row input[type="url"],
+  .form-row input[type="number"],
+  .form-row input[type="tel"],
+  .form-row input[type="date"],
+  .form-row input[type="datetime-local"],
+  .form-row select,
+  .form-row textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* ──────────────────────────────────────────
