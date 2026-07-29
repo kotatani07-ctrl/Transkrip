@@ -18,15 +18,18 @@ Aplikasi web Django internal untuk generate Transkrip Akademik mahasiswa secara 
 
 ## Konfigurasi Neo Feeder
 
-Salin `.env.example` ke `.env` di dalam `artifacts/transkrip-app/`:
+Kredensial disimpan sebagai **Replit Secrets & Env Vars** (bukan file `.env`):
 
-```
-FEEDER_HOST=192.168.1.100          # IP server Neo Feeder
-FEEDER_USERNAME=username_feeder
-FEEDER_PASSWORD=password_feeder
-SECRET_KEY=ganti-dengan-key-aman
-DEFAULT_NAMA_DEKAN=Dr. Nama Dekan, M.T.
-```
+| Key | Jenis | Keterangan |
+|---|---|---|
+| `SECRET_KEY` | Secret | Django secret key |
+| `FEEDER_PASSWORD` | Secret | Password Neo Feeder |
+| `FEEDER_HOST` | Env Var | IP/hostname server Neo Feeder |
+| `FEEDER_USERNAME` | Env Var | Username Neo Feeder |
+| `DEFAULT_NAMA_DEKAN` | Env Var | Nama dekan default di transkrip |
+| `DEBUG` | Env Var | `True` untuk development |
+
+Untuk mengubah nilai, gunakan tab **Secrets** di Replit.
 
 ## Where things live
 
