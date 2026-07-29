@@ -816,10 +816,171 @@ input[type="checkbox"] {
 /* ──────────────────────────────────────────
    20. RESPONSIVE
    ────────────────────────────────────────── */
+
+/* ── Tablet (≤ 1024px): shrink sidebar ── */
+@media (max-width: 1024px) {
+  #nav-sidebar { width: 200px !important; }
+}
+
+/* ── Mobile (≤ 767px): full layout overhaul ── */
 @media (max-width: 767px) {
-  #nav-sidebar { width: 100% !important; }
-  #content { padding: 16px !important; }
-  #header { padding: 0 16px !important; }
+
+  /* Header: stack branding + tools */
+  #header {
+    height: auto !important;
+    flex-wrap: wrap !important;
+    padding: 10px 14px !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  #branding {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  #branding h1 {
+    font-size: 0.9rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #user-tools {
+    flex-wrap: wrap !important;
+    gap: 8px 12px !important;
+    font-size: 0.75rem !important;
+    width: 100% !important;
+    border-top: 1px solid var(--glass-border-soft) !important;
+    padding-top: 8px !important;
+  }
+
+  /* Nav sidebar: collapse to hidden by default (Django's toggle handles show/hide) */
+  #nav-sidebar {
+    width: 100% !important;
+    position: relative !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--glass-border-soft) !important;
+  }
+
+  /* Content area: full width, reduced padding */
+  #content {
+    padding: 14px !important;
+  }
+  #content h1 {
+    font-size: 1.2rem !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumbs {
+    padding: 8px 14px !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    overflow-x: auto !important;
+  }
+
+  /* Tables: horizontal scroll */
+  #result_list,
+  .results,
+  .inline-group table,
+  .change-list table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  thead th {
+    white-space: nowrap !important;
+  }
+  tbody td {
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Toolbar: stack search + filters */
+  #toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  #searchbar, #toolbar input[type="search"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Right filter panel: full-width below content */
+  #changelist-filter {
+    float: none !important;
+    width: 100% !important;
+    margin-top: 16px !important;
+    margin-left: 0 !important;
+  }
+
+  /* Forms: inputs stretch full width */
+  .form-row {
+    flex-direction: column !important;
+    padding: 12px 14px !important;
+  }
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="url"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Submit row: stack buttons */
+  .submit-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .submit-row input[type="submit"],
+  .submit-row .button {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Object tools: wrap */
+  .object-tools {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  /* Actions row */
+  .actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  .actions select {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Inline admin: horizontal scroll */
+  .inline-group .tabular {
+    overflow-x: auto !important;
+    display: block !important;
+  }
+
+  /* Fieldset: reduce padding */
+  fieldset h2 {
+    padding: 10px 14px !important;
+  }
+  .form-row > label {
+    margin-bottom: 4px !important;
+    display: block !important;
+  }
 }
 
 /* ──────────────────────────────────────────

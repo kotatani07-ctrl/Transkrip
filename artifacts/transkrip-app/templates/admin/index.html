@@ -4,6 +4,20 @@
 {% block title %}Dashboard — Transkrip &amp; Ijazah Admin{% endblock %}
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .admin-index-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+  @media (max-width: 900px) {
+    .admin-index-grid { grid-template-columns: 1fr !important; }
+  }
+  /* Quick links bar wraps on mobile */
+  @media (max-width: 540px) {
+    .admin-index-grid > div:last-child { position: static !important; }
+  }
+</style>
+{% endblock %}
+
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
@@ -67,7 +81,7 @@
     </a>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+  <div class="admin-index-grid">
 
     <!-- Main: App list -->
     <div>
