@@ -42,3 +42,11 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+DEBUG = "True"
+DEFAULT_NAMA_DEKAN = "Dr. Nama Dekan, M.T."
+FEEDER_HOST = "82.41.42.150"
+FEEDER_USERNAME = "rroyani887@gmail.com"
