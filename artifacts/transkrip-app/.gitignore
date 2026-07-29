@@ -1,11 +1,83 @@
-.env
-db.sqlite3
+# =============================================================
+# Python
+# =============================================================
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.pythonlibs/
-media/
-staticfiles/
+*.py[cod]
+*$py.class
+*.so
+*.egg
 *.egg-info/
+dist/
+build/
+.eggs/
+.pythonlibs/
+venv/
+env/
+.venv/
+.env/
+pip-log.txt
+
+# =============================================================
+# Environment & Secrets
+# =============================================================
+.env
+.env.local
+.env.*.local
+*.secret
+
+# =============================================================
+# Django
+# =============================================================
+db.sqlite3
+db.sqlite3-journal
+*.log
+staticfiles/
+media/
+
+# =============================================================
+# Gambar & File Media (foto tidak ikut ke Git)
+# =============================================================
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.webp
+*.svg
+*.ico
+*.tiff
+*.tif
+*.heic
+*.raw
+
+# =============================================================
+# File Office & Upload
+# =============================================================
+# Catatan: file .xlsx template kurikulum & transkrip yang di-upload user
+# disimpan di folder media/ dan tidak masuk Git.
+# File .xlsx di root proyek (template statis) boleh masuk Git jika perlu.
+# Uncomment baris di bawah jika ingin exclude semua xlsx:
+# *.xlsx
+# *.xls
+# *.docx
+# *.pdf
+
+# =============================================================
+# IDE & Editor
+# =============================================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.cursor/
+*.swp
+*.swo
+*~
+
+# =============================================================
+# Sistem Operasi
+# =============================================================
 .DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
