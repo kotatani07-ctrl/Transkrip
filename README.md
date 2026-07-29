@@ -48,31 +48,35 @@ Aplikasi web berbasis **Django** untuk menghasilkan transkrip akademik mahasiswa
 ## Struktur Proyek
 
 ```
-transkrip-app/
-├── core/
-│   ├── admin.py            # Django admin + form upload Excel kurikulum
-│   ├── forms.py            # Form generate single & batch, filter riwayat
-│   ├── models.py           # Model: Template, Kurikulum, MataKuliah, dst.
-│   ├── views.py            # View: dashboard, generate single/batch, riwayat
-│   ├── urls.py             # URL routing aplikasi utama
-│   ├── migrations/         # Migrasi database Django
-│   └── services/
-│       ├── feeder.py       # Integrasi Neo Feeder PDDIKTI (GetToken, GetBiodata, GetNilai)
-│       ├── matching.py     # Logika pencocokan nilai mahasiswa ↔ kurikulum
-│       └── excel_gen.py    # Generate file Excel output (single & batch)
-├── transkrip_project/
-│   ├── settings.py         # Konfigurasi Django
-│   ├── urls.py             # Root URL dispatcher
-│   └── wsgi.py
-├── templates/              # HTML templates (login, dashboard, generate, riwayat)
-├── static/                 # File statis (CSS, JS, gambar)
-├── media/                  # Upload file (template Excel, dll.) — di-gitignore
-├── manage.py
-├── requirements.txt
-├── run.sh                  # Script startup (migrasi + jalankan server)
-├── .env.example            # Template konfigurasi environment
-├── DEV.md                  # Panduan setup lokal (Windows & Linux)
-└── CLAUDE.md               # Konteks proyek untuk AI — wajib diperbarui
+Transkrip/                          ← root repo
+├── README.md                       ← dokumentasi utama (file ini)
+├── artifacts/
+│   └── transkrip-app/              ← aplikasi Django utama
+│       ├── core/
+│       │   ├── admin.py            # Django admin + form upload Excel kurikulum
+│       │   ├── forms.py            # Form generate single & batch, filter riwayat
+│       │   ├── models.py           # Model: Template, Kurikulum, MataKuliah, dst.
+│       │   ├── views.py            # View: dashboard, generate single/batch, riwayat
+│       │   ├── urls.py             # URL routing aplikasi utama
+│       │   ├── migrations/         # Migrasi database Django
+│       │   └── services/
+│       │       ├── feeder.py       # Integrasi Neo Feeder PDDIKTI
+│       │       ├── matching.py     # Logika pencocokan nilai mahasiswa ↔ kurikulum
+│       │       └── excel_gen.py    # Generate file Excel output (single & batch)
+│       ├── transkrip_project/
+│       │   ├── settings.py         # Konfigurasi Django
+│       │   ├── urls.py             # Root URL dispatcher
+│       │   └── wsgi.py
+│       ├── templates/              # HTML templates (login, dashboard, generate, riwayat)
+│       ├── static/                 # File statis (CSS, JS, gambar)
+│       ├── media/                  # Upload file (template Excel, dll.) — di-gitignore
+│       ├── db.sqlite3              # Database SQLite — ikut Git
+│       ├── manage.py
+│       ├── requirements.txt
+│       ├── run.sh                  # Script startup (migrasi + jalankan server)
+│       ├── .env.example            # Template konfigurasi environment
+│       ├── DEV.md                  # Panduan setup lokal (Windows & Linux)
+│       └── CLAUDE.md               # Konteks proyek untuk AI — wajib diperbarui
 ```
 
 ---
@@ -124,7 +128,7 @@ Download file .xlsx
 Salin `.env.example` ke `.env` lalu isi nilainya:
 
 ```bash
-cp .env.example .env
+cp artifacts/transkrip-app/.env.example artifacts/transkrip-app/.env
 ```
 
 | Variabel | Wajib | Keterangan |
@@ -146,7 +150,7 @@ Neo Feeder terhubung ke endpoint: `http://{FEEDER_HOST}:3003/ws/live2.php`
 
 ## Cara Menjalankan
 
-Lihat **[DEV.md](DEV.md)** untuk panduan lengkap setup lokal di **Windows** dan **Linux**.
+Lihat **[artifacts/transkrip-app/DEV.md](artifacts/transkrip-app/DEV.md)** untuk panduan lengkap setup lokal di **Windows** dan **Linux**.
 
 ---
 
