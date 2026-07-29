@@ -1,0 +1,18 @@
+kind = "web"
+previewPath = "/"
+title = "Transkrip & Ijazah"
+version = "1.0.0"
+id = "artifacts/transkrip-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23524
+
+[services.development]
+run = "bash /home/runner/workspace/artifacts/transkrip-app/run.sh"
+
+[services.env]
+PORT = "23524"
+BASE_PATH = "/"
