@@ -24,13 +24,13 @@ args = "Transkrip App (Django)"
 name = "Transkrip App (Django)"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash artifacts/transkrip-app/run.sh"
-waitForPort = 8000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=23524 bash artifacts/transkrip-app/run.sh"
+waitForPort = 23524
 
 [agent]
 stack = "PNPM_WORKSPACE"
