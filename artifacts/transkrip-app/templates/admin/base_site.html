@@ -1,6 +1,7 @@
 {% extends "admin/base.html" %}
 {% load static i18n %}
 
+
 {% block title %}{{ title }} | Transkrip & Ijazah Admin{% endblock %}
 
 {% block branding %}
@@ -85,11 +86,19 @@
 {% endblock %}
 
 {% block dark-mode-vars %}
-{# Override — disable dark mode entirely for this theme #}
-<style>
-  /* Force light theme variables */
-  :root {
-    color-scheme: light;
-  }
-</style>
+{# Remove dark-mode script entirely — this theme is light-only #}
+<style>:root { color-scheme: light; }</style>
+{% endblock %}
+
+{% block userlinks %}
+  {% if site_url %}
+    <a href="{{ site_url }}">{% trans 'Lihat Situs' %}</a> /
+  {% endif %}
+  {% if user.has_usable_password %}
+    <a href="{% url 'admin:password_change' %}">{% trans 'Ganti Sandi' %}</a> /
+  {% endif %}
+  <form id="logout-form" method="post" action="{% url 'admin:logout' %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" style="background:none;border:none;padding:0;cursor:pointer;color:inherit;font:inherit;">{% trans 'Keluar' %}</button>
+  </form>
 {% endblock %}

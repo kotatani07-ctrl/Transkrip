@@ -844,12 +844,24 @@ input[type="checkbox"] {
     text-overflow: ellipsis !important;
   }
   #user-tools {
-    flex-wrap: wrap !important;
-    gap: 8px 12px !important;
-    font-size: 0.75rem !important;
-    width: 100% !important;
-    border-top: 1px solid var(--glass-border-soft) !important;
-    padding-top: 8px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+    gap: 0 !important;
+    /* Don't expand to full width — stay as a compact row */
+    width: auto !important;
+    max-width: 100% !important;
+    scrollbar-width: none !important; /* hide scrollbar on Firefox */
+  }
+  #user-tools::-webkit-scrollbar { display: none !important; }
+  /* Hide the welcome greeting on very small screens to save space */
+  @media (max-width: 480px) {
+    #user-tools .welcome-msg-container,
+    #user-tools > span:first-child {
+      display: none !important;
+    }
   }
 
   /* Nav sidebar: collapse to hidden by default (Django's toggle handles show/hide) */
