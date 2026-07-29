@@ -1,0 +1,301 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}Dashboard — Transkrip &amp; Ijazah Admin{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;">
+
+  <!-- Page heading -->
+  <div style="margin-bottom:28px;">
+    <h1 style="
+      font-size:1.7rem;
+      font-weight:700;
+      letter-spacing:-0.04em;
+      color:#1e1b4b;
+      margin:0 0 4px;
+      line-height:1.2;
+    ">
+      Panel Administrasi
+    </h1>
+    <p style="font-size:0.875rem;color:#9ca3af;margin:0;font-weight:400;">
+      Kelola data master, kurikulum, dan template transkrip
+    </p>
+  </div>
+
+  <!-- Quick links bar -->
+  <div style="
+    display:flex;gap:10px;flex-wrap:wrap;
+    margin-bottom:28px;
+  ">
+    <a href="/" style="
+      display:inline-flex;align-items:center;gap:7px;
+      padding:9px 18px;
+      background:rgba(255,255,255,0.75);
+      backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.8);
+      border-radius:10px;
+      font-size:0.84rem;font-weight:600;
+      color:#6366f1;
+      text-decoration:none;
+      box-shadow:0 2px 8px rgba(99,102,241,0.07);
+      transition:all 0.18s ease;
+    " onmouseover="this.style.boxShadow='0 4px 16px rgba(99,102,241,0.14)';this.style.transform='translateY(-1px)'"
+       onmouseout="this.style.boxShadow='0 2px 8px rgba(99,102,241,0.07)';this.style.transform='translateY(0)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Buka Aplikasi
+    </a>
+    <a href="{% url 'admin:password_change' %}" style="
+      display:inline-flex;align-items:center;gap:7px;
+      padding:9px 18px;
+      background:rgba(255,255,255,0.75);
+      backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.8);
+      border-radius:10px;
+      font-size:0.84rem;font-weight:600;
+      color:#6b7280;
+      text-decoration:none;
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);
+      transition:all 0.18s ease;
+    " onmouseover="this.style.color='#6366f1';this.style.transform='translateY(-1px)'"
+       onmouseout="this.style.color='#6b7280';this.style.transform='translateY(0)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Ganti Password
+    </a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+
+    <!-- Main: App list -->
+    <div>
+      {% if app_list %}
+        {% for app in app_list %}
+        <div style="
+          background:rgba(255,255,255,0.72);
+          backdrop-filter:blur(20px) saturate(180%);
+          -webkit-backdrop-filter:blur(20px) saturate(180%);
+          border:1px solid rgba(255,255,255,0.82);
+          border-radius:20px;
+          box-shadow:0 8px 32px rgba(99,102,241,0.07),0 2px 8px rgba(255,255,255,0.85) inset;
+          overflow:hidden;
+          margin-bottom:16px;
+        ">
+          <!-- App header -->
+          <div style="
+            padding:16px 22px 14px;
+            border-bottom:1px solid rgba(209,213,219,0.3);
+            display:flex;align-items:center;gap:10px;
+          ">
+            <div style="
+              width:28px;height:28px;
+              background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+              border-radius:8px;
+              display:flex;align-items:center;justify-content:center;
+              flex-shrink:0;
+            ">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;">Modul</div>
+              <div style="font-size:1rem;font-weight:700;color:#1e1b4b;letter-spacing:-0.02em;line-height:1.1;">
+                {{ app.name }}
+              </div>
+            </div>
+            {% if app.app_url %}
+            <a href="{{ app.app_url }}" style="
+              margin-left:auto;
+              font-size:0.78rem;font-weight:600;
+              color:#6366f1;text-decoration:none;
+              padding:5px 12px;
+              background:rgba(99,102,241,0.08);
+              border-radius:7px;
+              transition:background 0.15s;
+            " onmouseover="this.style.background='rgba(99,102,241,0.15)'"
+               onmouseout="this.style.background='rgba(99,102,241,0.08)'">
+              Lihat semua →
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- Models list -->
+          <div style="padding:8px 12px 12px;">
+            {% for model in app.models %}
+            <div style="
+              display:flex;align-items:center;justify-content:space-between;
+              padding:10px 10px;
+              border-radius:12px;
+              transition:background 0.15s;
+            " onmouseover="this.style.background='rgba(99,102,241,0.05)'"
+               onmouseout="this.style.background='transparent'">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="
+                  width:6px;height:6px;
+                  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                  border-radius:50%;
+                  flex-shrink:0;
+                "></div>
+                {% if model.admin_url %}
+                <a href="{{ model.admin_url }}" style="
+                  font-size:0.9rem;font-weight:600;
+                  color:#1e1b4b;text-decoration:none;
+                  letter-spacing:-0.01em;
+                " onmouseover="this.style.color='#6366f1'"
+                   onmouseout="this.style.color='#1e1b4b'">
+                  {{ model.name }}
+                </a>
+                {% else %}
+                <span style="font-size:0.9rem;font-weight:600;color:#9ca3af;">{{ model.name }}</span>
+                {% endif %}
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                {% if model.add_url %}
+                <a href="{{ model.add_url }}" style="
+                  display:inline-flex;align-items:center;gap:5px;
+                  font-size:0.76rem;font-weight:600;
+                  color:#6366f1;text-decoration:none;
+                  padding:4px 10px;
+                  background:rgba(99,102,241,0.08);
+                  border-radius:7px;
+                  transition:all 0.15s;
+                " onmouseover="this.style.background='rgba(99,102,241,0.15)'"
+                   onmouseout="this.style.background='rgba(99,102,241,0.08)'">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Tambah
+                </a>
+                {% endif %}
+                {% if model.admin_url %}
+                <a href="{{ model.admin_url }}" style="
+                  display:inline-flex;align-items:center;gap:4px;
+                  font-size:0.76rem;font-weight:500;
+                  color:#9ca3af;text-decoration:none;
+                  padding:4px 10px;
+                  border-radius:7px;
+                  transition:color 0.15s;
+                " onmouseover="this.style.color='#6366f1'"
+                   onmouseout="this.style.color='#9ca3af'">
+                  Lihat
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <div style="
+          background:rgba(255,255,255,0.72);
+          backdrop-filter:blur(20px);
+          border:1px solid rgba(255,255,255,0.82);
+          border-radius:20px;
+          padding:40px;
+          text-align:center;
+          color:#9ca3af;
+          font-size:0.875rem;
+        ">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;display:block;opacity:0.3;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Tidak ada model yang tersedia atau Anda tidak memiliki izin.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar: Recent Actions -->
+    <div>
+      {% if recent_actions %}
+      <div style="
+        background:rgba(255,255,255,0.72);
+        backdrop-filter:blur(20px) saturate(180%);
+        -webkit-backdrop-filter:blur(20px) saturate(180%);
+        border:1px solid rgba(255,255,255,0.82);
+        border-radius:20px;
+        box-shadow:0 8px 32px rgba(99,102,241,0.07);
+        overflow:hidden;
+        position:sticky;top:80px;
+      ">
+        <div style="
+          padding:15px 18px 13px;
+          border-bottom:1px solid rgba(209,213,219,0.3);
+          display:flex;align-items:center;gap:8px;
+        ">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;">
+            Aksi Terakhir
+          </span>
+        </div>
+        <div style="padding:6px 0;">
+          {% for entry in recent_actions %}
+          <div style="
+            padding:10px 18px;
+            border-bottom:1px solid rgba(243,244,246,0.8);
+            transition:background 0.15s;
+          " onmouseover="this.style.background='rgba(99,102,241,0.04)'"
+             onmouseout="this.style.background='transparent'">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <!-- Action icon -->
+              {% if entry.is_addition %}
+              <div style="
+                width:20px;height:20px;flex-shrink:0;
+                background:rgba(16,185,129,0.12);
+                border-radius:6px;
+                display:flex;align-items:center;justify-content:center;
+                margin-top:1px;
+              ">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              {% elif entry.is_change %}
+              <div style="
+                width:20px;height:20px;flex-shrink:0;
+                background:rgba(245,158,11,0.12);
+                border-radius:6px;
+                display:flex;align-items:center;justify-content:center;
+                margin-top:1px;
+              ">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </div>
+              {% elif entry.is_deletion %}
+              <div style="
+                width:20px;height:20px;flex-shrink:0;
+                background:rgba(239,68,68,0.10);
+                border-radius:6px;
+                display:flex;align-items:center;justify-content:center;
+                margin-top:1px;
+              ">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              </div>
+              {% endif %}
+
+              <div style="flex:1;min-width:0;">
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                <div style="font-size:0.84rem;font-weight:600;color:#1e1b4b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  {{ entry.object_repr }}
+                </div>
+                {% else %}
+                <a href="{{ entry.get_admin_url }}" style="
+                  font-size:0.84rem;font-weight:600;
+                  color:#1e1b4b;text-decoration:none;
+                  display:block;
+                  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                " onmouseover="this.style.color='#6366f1'"
+                   onmouseout="this.style.color='#1e1b4b'">
+                  {{ entry.object_repr }}
+                </a>
+                {% endif %}
+                <div style="font-size:0.74rem;color:#9ca3af;margin-top:1px;">
+                  {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

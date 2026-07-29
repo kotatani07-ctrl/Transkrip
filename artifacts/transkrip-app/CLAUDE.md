@@ -120,5 +120,6 @@ DEFAULT_NAMA_DEKAN  # Nama dekan default di transkrip
 | Tanggal | Perubahan |
 |---|---|
 | 2026-07-29 | Setup awal proyek di Replit, instalasi dependencies, konfigurasi workflow |
+| 2026-07-29 | Tema glassmorphism iPhone-inspired untuk Django admin: `templates/admin/base_site.html`, `templates/admin/login.html`, `templates/admin/index.html`, `static/admin/css/glass-admin.css` |
 
 > Tambahkan baris baru di tabel ini setiap ada perubahan besar.
