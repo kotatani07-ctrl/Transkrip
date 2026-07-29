@@ -822,23 +822,50 @@ input[type="checkbox"] {
   #nav-sidebar { width: 200px !important; }
 }
 
+/* ── Mobile nav sidebar — backdrop ── */
+#admin-mobile-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1040;
+}
+#admin-mobile-backdrop.active { display: block; }
+
+/* ── Mobile sidebar header (brand + X) ── */
+#admin-sidebar-mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 14px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  flex-shrink: 0;
+}
+#admin-sidebar-close:hover { color: #fff !important; background: rgba(255,255,255,.1) !important; }
+
 /* ── Mobile (≤ 767px): full layout overhaul ── */
 @media (max-width: 767px) {
 
-  /* Header: stack branding + tools */
+  /* Show sidebar mobile header */
+  #admin-sidebar-mobile-header { display: flex !important; }
+
+  /* Header: keep single row, compact */
   #header {
-    height: auto !important;
-    flex-wrap: wrap !important;
-    padding: 10px 14px !important;
-    gap: 6px !important;
+    height: 56px !important;
+    flex-wrap: nowrap !important;
+    padding: 0 12px !important;
+    gap: 4px !important;
     align-items: center !important;
   }
   #branding {
     flex: 1 1 auto !important;
     min-width: 0 !important;
+    overflow: hidden !important;
   }
   #branding h1 {
-    font-size: 0.9rem !important;
+    font-size: 0.88rem !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -850,27 +877,95 @@ input[type="checkbox"] {
     font-size: 0.72rem !important;
     white-space: nowrap !important;
     gap: 0 !important;
-    /* Don't expand to full width — stay as a compact row */
     width: auto !important;
-    max-width: 100% !important;
-    scrollbar-width: none !important; /* hide scrollbar on Firefox */
+    max-width: 60% !important;
+    scrollbar-width: none !important;
   }
   #user-tools::-webkit-scrollbar { display: none !important; }
-  /* Hide the welcome greeting on very small screens to save space */
-  @media (max-width: 480px) {
-    #user-tools .welcome-msg-container,
-    #user-tools > span:first-child {
-      display: none !important;
-    }
+
+  /* Nav sidebar — overlay drawer from left */
+  #nav-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    /* Override glass style — use app's dark-blue sidebar */
+    background: #1a5276 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+  }
+  #nav-sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 40px rgba(0,0,0,0.25) !important;
   }
 
-  /* Nav sidebar: collapse to hidden by default (Django's toggle handles show/hide) */
-  #nav-sidebar {
-    width: 100% !important;
-    position: relative !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--glass-border-soft) !important;
+  /* Nav sidebar links — restyle for dark background */
+  #nav-sidebar #nav-filter {
+    margin: 12px !important;
+    width: calc(100% - 24px) !important;
+    background: rgba(255,255,255,.12) !important;
+    border: 1px solid rgba(255,255,255,.2) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
   }
+  #nav-sidebar #nav-filter::placeholder { color: rgba(255,255,255,.45) !important; }
+  #nav-sidebar #nav-filter:focus {
+    background: rgba(255,255,255,.18) !important;
+    border-color: rgba(255,255,255,.4) !important;
+    box-shadow: none !important;
+  }
+
+  #nav-sidebar .module caption,
+  #nav-sidebar .module th[scope="row"],
+  #nav-sidebar table caption {
+    color: rgba(255,255,255,.4) !important;
+    font-size: .65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+    padding: 10px 16px 4px !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  #nav-sidebar a {
+    color: rgba(255,255,255,.75) !important;
+    padding: 9px 16px !important;
+    border-radius: 0 !important;
+    border-left: 3px solid transparent !important;
+    font-size: .88rem !important;
+    margin: 0 !important;
+  }
+  #nav-sidebar a:hover {
+    background: rgba(255,255,255,.1) !important;
+    color: #fff !important;
+    border-left-color: #5dade2 !important;
+  }
+  #nav-sidebar .module {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Main content — don't shift when sidebar opens (it's overlay now) */
+  #main.shifted { margin-left: 0 !important; }
+  #main.shifted #content,
+  #main.shifted #content-related { margin-left: 0 !important; }
+
+  /* Hide Django's built-in toggle button on mobile */
+  .toggle-nav-sidebar { display: none !important; }
 
   /* Content area: full width, reduced padding */
   #content {

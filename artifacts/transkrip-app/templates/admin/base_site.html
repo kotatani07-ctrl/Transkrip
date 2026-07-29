@@ -6,6 +6,25 @@
 
 {% block branding %}
 <div style="display:flex;align-items:center;gap:10px;">
+
+  <!-- Hamburger — mobile only -->
+  <button id="admin-mobile-hamburger" type="button" aria-label="Buka menu navigasi" style="
+    display:none;
+    align-items:center;justify-content:center;
+    width:36px;height:36px;
+    background:none;border:none;
+    border-radius:8px;cursor:pointer;
+    color:#6b7280;flex-shrink:0;
+    transition:background 0.15s;
+  ">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Logo icon -->
   <div style="
     width:32px;height:32px;
     background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
@@ -22,6 +41,8 @@
       <polyline points="10 9 9 9 8 9"/>
     </svg>
   </div>
+
+  <!-- Title -->
   <div>
     <h1 id="site-name" style="margin:0;line-height:1.1;">
       <a href="{% url 'admin:index' %}" style="text-decoration:none;">Transkrip &amp; Ijazah</a>
@@ -88,6 +109,90 @@
 {% block dark-mode-vars %}
 {# Remove dark-mode script entirely — this theme is light-only #}
 <style>:root { color-scheme: light; }</style>
+{% endblock %}
+
+{% block extrabody %}
+{{ block.super }}
+<!-- Mobile admin backdrop -->
+<div id="admin-mobile-backdrop"></div>
+
+<script>
+(function() {
+  var MQ = window.matchMedia('(max-width: 767px)');
+
+  var hamburger  = document.getElementById('admin-mobile-hamburger');
+  var backdrop   = document.getElementById('admin-mobile-backdrop');
+  var navSidebar = document.getElementById('nav-sidebar');
+  var main       = document.getElementById('main');
+
+  if (!navSidebar) return;
+
+  /* ── Inject sidebar header (brand + close btn) once ── */
+  var sidebarHeader = document.createElement('div');
+  sidebarHeader.id = 'admin-sidebar-mobile-header';
+  sidebarHeader.innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">' +
+      '<div style="width:28px;height:28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);' +
+           'border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round">' +
+          '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' +
+          '<polyline points="14 2 14 8 20 8"/>' +
+          '<line x1="16" y1="13" x2="8" y2="13"/>' +
+          '<line x1="16" y1="17" x2="8" y2="17"/>' +
+        '</svg>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-size:.88rem;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.1;">Transkrip &amp; Ijazah</div>' +
+        '<div style="font-size:.68rem;color:rgba(255,255,255,.55);font-weight:500;margin-top:1px;">Panel Administrasi</div>' +
+      '</div>' +
+    '</div>' +
+    '<button id="admin-sidebar-close" type="button" aria-label="Tutup menu" style="' +
+      'background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;' +
+      'color:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">' +
+        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+      '</svg>' +
+    '</button>';
+  navSidebar.insertBefore(sidebarHeader, navSidebar.firstChild);
+
+  /* ── Open / close helpers ── */
+  function openSidebar() {
+    navSidebar.classList.add('mobile-open');
+    backdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    /* Prevent Django's own toggle from also shifting content */
+    if (main) main.classList.remove('shifted');
+  }
+
+  function closeSidebar() {
+    navSidebar.classList.remove('mobile-open');
+    backdrop.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  /* ── Wire up hamburger + backdrop + close btn ── */
+  if (hamburger)  hamburger.addEventListener('click', openSidebar);
+  if (backdrop)   backdrop.addEventListener('click', closeSidebar);
+  document.getElementById('admin-sidebar-close').addEventListener('click', closeSidebar);
+
+  /* Close on nav link tap (so it doesn't stay open after navigation) */
+  navSidebar.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() { if (MQ.matches) closeSidebar(); });
+  });
+
+  /* ── Show hamburger on mobile, hide on desktop ── */
+  function syncHamburger(e) {
+    if (!hamburger) return;
+    hamburger.style.display = e.matches ? 'flex' : 'none';
+    /* Also hide Django's built-in toggle on mobile (we replace it) */
+    var builtin = document.getElementById('toggle-nav-sidebar');
+    if (builtin) builtin.style.display = e.matches ? 'none' : '';
+    if (!e.matches) closeSidebar();
+  }
+  MQ.addEventListener('change', syncHamburger);
+  syncHamburger(MQ);
+})();
+</script>
 {% endblock %}
 
 {% block userlinks %}
