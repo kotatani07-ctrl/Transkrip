@@ -131,7 +131,7 @@ def get_biodata_mahasiswa(nim: str) -> dict:
     payload = {
         "act": "GetBiodataMahasiswa",
         "token": token,
-        "filter": f"a.nim_mahasiswa='{nim}'",
+        "filter": f"a.id_mahasiswa='{nim}'",
     }
     response = _call_feeder(payload)
 
@@ -158,7 +158,7 @@ def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     payload = {
         "act": "GetNilaiPerkuliahanMahasiswa",
         "token": token,
-        "filter": f"a.nim_mahasiswa='{nim}'",
+        "filter": f"a.id_mahasiswa='{nim}'",
     }
     response = _call_feeder(payload)
 
