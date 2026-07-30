@@ -926,36 +926,137 @@ input[type="checkbox"] {
     box-shadow: none !important;
   }
 
-  #nav-sidebar .module caption,
-  #nav-sidebar .module th[scope="row"],
-  #nav-sidebar table caption {
-    color: rgba(255,255,255,.4) !important;
-    font-size: .65rem !important;
-    font-weight: 700 !important;
-    letter-spacing: .08em !important;
-    text-transform: uppercase !important;
-    padding: 10px 16px 4px !important;
+  /* ── Nav sidebar: complete table overhaul ── */
+
+  /* Flatten table structure so we can use flex on rows */
+  #nav-sidebar table,
+  #nav-sidebar tbody {
+    display: block !important;
+    width: 100% !important;
     background: transparent !important;
     border: none !important;
   }
-  #nav-sidebar a {
-    color: rgba(255,255,255,.75) !important;
-    padding: 9px 16px !important;
-    border-radius: 0 !important;
+
+  /* Section label (caption = app name: "Autentikasi dan Otorisasi", "Core") */
+  #nav-sidebar table caption {
+    display: block !important;
+    caption-side: top !important;
+    padding: 18px 16px 5px !important;
+    font-size: .62rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+    color: rgba(255,255,255,.30) !important;
+    text-align: left !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  #nav-sidebar table caption a {
+    color: rgba(255,255,255,.30) !important;
+    display: inline !important;
+    padding: 0 !important;
+    border: none !important;
+    border-left: none !important;
+    background: transparent !important;
+    font-size: .62rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .1em !important;
+    text-transform: uppercase !important;
+  }
+  #nav-sidebar table caption a:hover {
+    color: rgba(255,255,255,.55) !important;
+    background: transparent !important;
+    border-left-color: transparent !important;
+  }
+
+  /* Each model row — flex so th (name) + td (actions) sit side by side */
+  #nav-sidebar tr {
+    display: flex !important;
+    align-items: center !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+  }
+  /* Nuke alternating row colors from Django/browser defaults */
+  #nav-sidebar tr:nth-child(even),
+  #nav-sidebar tr:nth-child(odd) {
+    background: transparent !important;
+  }
+  #nav-sidebar tr:hover {
+    background: rgba(255,255,255,.06) !important;
+  }
+
+  /* Model name cell (th[scope="row"]) — takes remaining width */
+  #nav-sidebar th[scope="row"] {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    font-weight: normal !important;
+    text-transform: none !important;  /* cancel .module th uppercase */
+  }
+  #nav-sidebar th[scope="row"] a {
+    display: block !important;
+    padding: 10px 14px 10px 16px !important;
+    color: rgba(255,255,255,.82) !important;
+    font-size: .875rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
     border-left: 3px solid transparent !important;
-    font-size: .88rem !important;
+    border-radius: 0 !important;
+    white-space: normal !important;
+    line-height: 1.35 !important;
+    background: transparent !important;
     margin: 0 !important;
   }
-  #nav-sidebar a:hover {
-    background: rgba(255,255,255,.1) !important;
+  #nav-sidebar th[scope="row"] a:hover {
     color: #fff !important;
+    background: transparent !important;
     border-left-color: #5dade2 !important;
   }
+
+  /* Action cells (Tambah, Lihat) — shrink-wrap as small pills */
+  #nav-sidebar td {
+    flex: 0 0 auto !important;
+    padding: 0 6px 0 0 !important;
+    background: transparent !important;
+    border: none !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+  }
+  #nav-sidebar td a {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    font-size: .7rem !important;
+    font-weight: 600 !important;
+    color: rgba(255,255,255,.42) !important;
+    border: 1px solid rgba(255,255,255,.11) !important;
+    border-left: 1px solid rgba(255,255,255,.11) !important;
+    background: rgba(255,255,255,.05) !important;
+    white-space: nowrap !important;
+    letter-spacing: 0 !important;
+    margin: 0 !important;
+  }
+  #nav-sidebar td a:hover {
+    color: #fff !important;
+    background: rgba(255,255,255,.13) !important;
+    border-color: rgba(255,255,255,.25) !important;
+  }
+
+  /* Module wrapper — transparent, no card */
   #nav-sidebar .module {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow: visible !important;
   }
 
   /* Main content — don't shift when sidebar opens (it's overlay now) */
