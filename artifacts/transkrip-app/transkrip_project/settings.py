@@ -21,6 +21,17 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
     'https://*.replit.dev,https://*.replit.app,http://localhost:*'
 ).split(',')
 
+# ── Cookie / CSRF settings untuk Replit proxy ───────────────────────
+# Replit proxies HTTPS → HTTP ke Django. Cookie CSRF sering diblok
+# browser karena SameSite / Secure mismatch di balik proxy.
+# Solusi: simpan token CSRF di session (bukan cookie terpisah).
+CSRF_USE_SESSIONS    = True
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'Lax'
+# Percayai header X-Forwarded-Proto dari Replit proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
