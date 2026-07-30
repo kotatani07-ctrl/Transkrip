@@ -1,16 +1,17 @@
 """
 Integrasi dengan Neo Feeder PDDIKTI.
-Read-only: hanya memanggil GetToken, GetListMahasiswa, GetBiodataMahasiswa,
-GetRiwayatNilaiMahasiswa.
+Read-only: hanya memanggil GetToken, GetBiodataMahasiswa, GetRiwayatNilaiMahasiswa.
 TIDAK mengimplementasi fungsi Insert/Update/Delete apapun.
 
 Flow pencarian per NIM:
-  1. GetListMahasiswa        (filter: a.nim_mahasiswa='NIM')
-         → id_mahasiswa, id_registrasi, jenjang_didik, tahun_masuk, nama_program_studi, dsb.
-  2. GetBiodataMahasiswa     (filter: a.id_mahasiswa='...')
-         → nama_mahasiswa, tempat_lahir, tanggal_lahir, dsb.
-  3. GetRiwayatNilaiMahasiswa (filter: a.id_registrasi='...')
+  1. GetBiodataMahasiswa       (filter: a.nim_mahasiswa='NIM')
+         → nama_mahasiswa, tempat_lahir, tanggal_lahir, id_mahasiswa, id_registrasi,
+           jenjang_didik, tahun_masuk, nama_program_studi, tanggal_lulus, dsb.
+  2. GetRiwayatNilaiMahasiswa  (filter: a.id_registrasi='...' atau a.nim_mahasiswa='NIM')
          → daftar nilai: kode_mata_kuliah, nama_mata_kuliah, sks, nilai_lambang, nilai_angka
+
+Catatan: GetListMahasiswa tidak digunakan karena kolom a.nim_mahasiswa tidak tersedia
+di tabel utama endpoint tersebut (hanya ada a.id_mahasiswa / a.nama_mahasiswa).
 """
 import base64
 import json
@@ -62,9 +63,9 @@ def _call_feeder(payload: dict) -> dict:
     """
     Kirim request POST ke endpoint Neo Feeder.
     Return dict response atau raise exception.
+    Jika response mengandung error_code, raise RuntimeError dengan pesan lengkap.
     """
     url = _get_feeder_url()
-    # Connection: close mencegah reuse koneksi yang sudah expired
     headers = {
         'Content-Type': 'application/json',
         'Connection': 'close',
@@ -78,6 +79,16 @@ def _call_feeder(payload: dict) -> dict:
         )
         resp.raise_for_status()
         data = resp.json()
+
+        # Cek error_code dari Feeder (bukan HTTP error, tapi error logis)
+        if isinstance(data, dict) and data.get('error_code') not in (None, 0, '0', ''):
+            err_code = data.get('error_code')
+            err_desc = data.get('error_desc', 'Tidak ada deskripsi')
+            act = payload.get('act', '?')
+            raise RuntimeError(
+                f"Feeder menolak '{act}' (error_code={err_code}): {err_desc}"
+            )
+
         return data
     except requests.exceptions.ConnectionError as e:
         raise ConnectionError(
@@ -90,6 +101,8 @@ def _call_feeder(payload: dict) -> dict:
             f"saat memanggil '{payload.get('act', '?')}'. "
             f"Server mungkin sedang lambat atau endpoint tidak merespons dari jaringan ini."
         )
+    except RuntimeError:
+        raise
     except Exception as e:
         raise RuntimeError(f"Error memanggil Neo Feeder '{payload.get('act', '?')}': {e}")
 
@@ -136,16 +149,20 @@ def get_token() -> str:
         return token
 
 
-def get_program_mahasiswa(nim: str) -> dict:
+def get_biodata_mahasiswa(nim: str) -> dict:
     """
-    Ambil data program/registrasi mahasiswa berdasarkan NIM via GetListMahasiswa.
-    Return dict dengan field: id_mahasiswa, id_registrasi, nim_mahasiswa,
-    jenjang_didik, tahun_masuk, tanggal_lulus, nama_program_studi, dsb.
-    Raise exception jika tidak ditemukan atau timeout.
+    Ambil biodata + data akademik mahasiswa berdasarkan NIM.
+    Menggunakan GetBiodataMahasiswa dengan filter a.nim_mahasiswa.
+    Endpoint ini join registrasi_mahasiswa sehingga kolom nim_mahasiswa tersedia.
+
+    Return dict yang mengandung (bergantung versi Feeder):
+      nama_mahasiswa, tempat_lahir, tanggal_lahir,
+      id_mahasiswa, id_registrasi, nim_mahasiswa,
+      jenjang_didik, tahun_masuk, nama_program_studi, tanggal_lulus, dsb.
     """
     token = get_token()
     payload = {
-        "act": "GetListMahasiswa",
+        "act": "GetBiodataMahasiswa",
         "token": token,
         "filter": f"a.nim_mahasiswa='{nim}'",
     }
@@ -157,85 +174,50 @@ def get_program_mahasiswa(nim: str) -> dict:
         if len(data) == 0:
             raise ValueError(
                 f"Mahasiswa dengan NIM '{nim}' tidak ditemukan di Feeder "
-                f"(GetListMahasiswa kosong)."
+                f"(GetBiodataMahasiswa kosong)."
             )
-        # Ambil entri terakhir (registrasi terbaru)
+        # Ambil entri pertama (atau terbaru jika ada beberapa registrasi)
         data = data[-1]
 
     if not isinstance(data, dict):
         raise ValueError(
-            f"Format response GetListMahasiswa tidak terduga: {response}"
+            f"Format response GetBiodataMahasiswa tidak terduga untuk NIM '{nim}': {response}"
         )
+
+    # Pastikan nim_mahasiswa selalu ada di hasil
+    if 'nim_mahasiswa' not in data:
+        data['nim_mahasiswa'] = nim
 
     return data
 
 
-def get_biodata_mahasiswa(nim: str) -> dict:
+# Alias untuk kompatibilitas internal (dipakai di views melalui matching.parse_biodata)
+def get_program_mahasiswa(nim: str) -> dict:
     """
-    Ambil biodata lengkap mahasiswa berdasarkan NIM.
-    Flow: GetListMahasiswa → ambil id_mahasiswa → GetBiodataMahasiswa.
-    Menggabungkan data program (jenjang, angkatan, tanggal_lulus) ke dalam hasil.
+    Alias get_biodata_mahasiswa — dikembalikan agar kompatibel dengan flow lama
+    yang butuh id_registrasi + data akademik.
     """
-    # Step 1: data program (mengandung id_mahasiswa + data akademik)
-    program = get_program_mahasiswa(nim)
-
-    id_mahasiswa = (
-        program.get('id_mahasiswa')
-        or program.get('id_mhs')
-    )
-    if not id_mahasiswa:
-        # Jika GetListMahasiswa sudah ada nama_mahasiswa, kembalikan langsung
-        if program.get('nama_mahasiswa'):
-            logger.info(f"GetListMahasiswa sudah mengandung biodata untuk NIM {nim}")
-            return program
-        raise ValueError(
-            f"GetListMahasiswa tidak mengembalikan id_mahasiswa untuk NIM '{nim}'. "
-            f"Field tersedia: {list(program.keys())}"
-        )
-
-    # Step 2: biodata personal via id_mahasiswa
-    token = get_token()
-    payload = {
-        "act": "GetBiodataMahasiswa",
-        "token": token,
-        "filter": f"a.id_mahasiswa='{id_mahasiswa}'",
-    }
-    try:
-        response = _call_feeder(payload)
-        biodata = response.get('data', response) if isinstance(response, dict) else response
-
-        if isinstance(biodata, list):
-            biodata = biodata[0] if biodata else {}
-        if not isinstance(biodata, dict):
-            biodata = {}
-    except Exception as e:
-        logger.warning(f"GetBiodataMahasiswa gagal untuk {nim}: {e}. Menggunakan data program saja.")
-        biodata = {}
-
-    # Gabungkan: program data sebagai base, biodata melengkapi
-    merged = {**program, **biodata}
-    # Pastikan nim_mahasiswa selalu ada
-    if 'nim_mahasiswa' not in merged:
-        merged['nim_mahasiswa'] = nim
-    return merged
+    return get_biodata_mahasiswa(nim)
 
 
 def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     """
-    Ambil daftar riwayat nilai mahasiswa berdasarkan NIM via GetRiwayatNilaiMahasiswa.
-    Filter by id_registrasi (dari GetListMahasiswa), fallback ke nim_mahasiswa.
-    Return list of dict dengan field: kode_mata_kuliah, nama_mata_kuliah,
-    sks_mata_kuliah, nilai_lambang, nilai_angka.
+    Ambil daftar riwayat nilai mahasiswa via GetRiwayatNilaiMahasiswa.
+    Filter by id_registrasi (dari GetBiodataMahasiswa), fallback ke nim_mahasiswa.
+
+    Return list of dict dengan field (bergantung versi Feeder):
+      kode_mata_kuliah, nama_mata_kuliah, sks_mata_kuliah,
+      nilai_lambang, nilai_angka, id_semester, dsb.
     """
     token = get_token()
 
-    # Coba dapatkan id_registrasi dari data program
+    # Coba dapatkan id_registrasi dari biodata
     id_registrasi = None
     try:
-        program = get_program_mahasiswa(nim)
+        biodata = get_biodata_mahasiswa(nim)
         id_registrasi = (
-            program.get('id_registrasi')
-            or program.get('id_reg')
+            biodata.get('id_registrasi')
+            or biodata.get('id_reg')
         )
     except Exception as e:
         logger.warning(f"Tidak bisa ambil id_registrasi untuk {nim}: {e}")
@@ -257,7 +239,7 @@ def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
 
     data = response.get('data', response) if isinstance(response, dict) else response
 
-    if data is None:
+    if data is None or data == '':
         return []
     if isinstance(data, list):
         return data
