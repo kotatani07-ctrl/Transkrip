@@ -210,8 +210,8 @@
     navSidebar.classList.add('mobile-open');
     backdrop.classList.add('active');
     document.body.style.overflow = 'hidden';
-    /* Prevent Django's own toggle from also shifting content */
-    if (main) main.classList.remove('shifted');
+    /* NOTE: do NOT touch main.shifted — removing it triggers Django's
+       .main > #nav-sidebar { visibility:hidden } rule, making the drawer invisible */
   }
 
   function closeSidebar() {

@@ -897,6 +897,13 @@ input[type="checkbox"] {
     display: flex !important;
     flex-direction: column !important;
     padding: 0 !important;
+    /* Django's nav_sidebar.css sets visibility:hidden on .main > #nav-sidebar —
+       override so the drawer content is visible when it slides in */
+    visibility: visible !important;
+  }
+  /* Also override the child-combinator rule .main > #nav-sidebar { visibility:hidden } */
+  .main > #nav-sidebar {
+    visibility: visible !important;
   }
   #nav-sidebar.mobile-open {
     transform: translateX(0) !important;
