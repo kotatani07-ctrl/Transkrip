@@ -870,18 +870,10 @@ input[type="checkbox"] {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
+  /* User-tools disembunyikan dari header — dipindah ke dalam drawer sidebar */
   #user-tools {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    font-size: 0.72rem !important;
-    white-space: nowrap !important;
-    gap: 0 !important;
-    width: auto !important;
-    max-width: 60% !important;
-    scrollbar-width: none !important;
+    display: none !important;
   }
-  #user-tools::-webkit-scrollbar { display: none !important; }
 
   /* Nav sidebar — overlay drawer from left */
   #nav-sidebar {
