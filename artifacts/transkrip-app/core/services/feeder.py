@@ -266,3 +266,82 @@ def clear_token_cache():
     with _token_lock:
         _token_cache['token'] = None
         _token_cache['exp'] = 0
+
+
+# Cache hasil check_connection agar tidak hit Feeder tiap load dashboard
+_conn_cache = {
+    'ok': None,
+    'msg': '',
+    'checked_at': 0,
+}
+_conn_lock = Lock()
+CONN_CACHE_TTL = 60  # detik
+
+
+def check_connection() -> tuple[bool, str]:
+    """
+    Cek koneksi nyata ke Neo Feeder dengan memanggil GetToken (timeout 5 detik).
+    Hasil di-cache selama CONN_CACHE_TTL detik agar dashboard tidak lambat.
+    Return: (ok: bool, pesan: str)
+    """
+    with _conn_lock:
+        now = time.time()
+        if _conn_cache['ok'] is not None and now - _conn_cache['checked_at'] < CONN_CACHE_TTL:
+            return _conn_cache['ok'], _conn_cache['msg']
+
+    # Cek konfigurasi dulu
+    host = getattr(settings, 'FEEDER_HOST', '')
+    username = getattr(settings, 'FEEDER_USERNAME', '')
+    password = getattr(settings, 'FEEDER_PASSWORD', '')
+    if not (host and username and password):
+        result = (False, 'Konfigurasi FEEDER_HOST / USERNAME / PASSWORD belum lengkap.')
+        _update_conn_cache(*result)
+        return result
+
+    url = f"http://{host}:3003/ws/live2.php"
+    payload = {
+        "act": "GetToken",
+        "username": username,
+        "password": password,
+    }
+    headers = {'Content-Type': 'application/json', 'Connection': 'close'}
+
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        token = (
+            data.get('data', {}).get('token')
+            or data.get('token')
+            or data.get('data')
+        ) if isinstance(data, dict) else None
+
+        if token:
+            # Simpan ke token cache juga agar tidak login ulang saat generate
+            payload_data = _decode_jwt_payload(token)
+            exp = payload_data.get('exp', time.time() + 3600)
+            with _token_lock:
+                _token_cache['token'] = token
+                _token_cache['exp'] = exp
+            result = (True, host)
+        else:
+            result = (False, f'Server merespons tapi GetToken gagal: {data}')
+
+    except requests.exceptions.ConnectionError:
+        result = (False, f'Tidak bisa menjangkau {host}:3003 — server mati atau IP salah.')
+    except requests.exceptions.Timeout:
+        result = (False, f'Koneksi ke {host}:3003 timeout (>5 detik).')
+    except requests.exceptions.HTTPError as e:
+        result = (False, f'HTTP error dari Feeder: {e}')
+    except Exception as e:
+        result = (False, f'Error: {e}')
+
+    _update_conn_cache(*result)
+    return result
+
+
+def _update_conn_cache(ok: bool, msg: str):
+    with _conn_lock:
+        _conn_cache['ok'] = ok
+        _conn_cache['msg'] = msg
+        _conn_cache['checked_at'] = time.time()
