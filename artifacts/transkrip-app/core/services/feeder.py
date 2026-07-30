@@ -1,13 +1,16 @@
 """
 Integrasi dengan Neo Feeder PDDIKTI.
-Read-only: hanya memanggil GetToken, GetMahasiswaProgram, GetBiodataMahasiswa,
-GetNilaiPerkuliahanMahasiswa.
+Read-only: hanya memanggil GetToken, GetListMahasiswa, GetBiodataMahasiswa,
+GetRiwayatNilaiMahasiswa.
 TIDAK mengimplementasi fungsi Insert/Update/Delete apapun.
 
 Flow pencarian per NIM:
-  1. GetMahasiswaProgram  (filter: a.nim_mahasiswa)  → id_mahasiswa, id_registrasi, data program
-  2. GetBiodataMahasiswa  (filter: a.id_mahasiswa)   → nama, tempat/tanggal lahir, dsb.
-  3. GetNilaiPerkuliahanMahasiswa (filter: a.id_registrasi) → daftar nilai
+  1. GetListMahasiswa        (filter: a.nim_mahasiswa='NIM')
+         → id_mahasiswa, id_registrasi, jenjang_didik, tahun_masuk, nama_program_studi, dsb.
+  2. GetBiodataMahasiswa     (filter: a.id_mahasiswa='...')
+         → nama_mahasiswa, tempat_lahir, tanggal_lahir, dsb.
+  3. GetRiwayatNilaiMahasiswa (filter: a.id_registrasi='...')
+         → daftar nilai: kode_mata_kuliah, nama_mata_kuliah, sks, nilai_lambang, nilai_angka
 """
 import base64
 import json
@@ -135,14 +138,14 @@ def get_token() -> str:
 
 def get_program_mahasiswa(nim: str) -> dict:
     """
-    Ambil data program/registrasi mahasiswa berdasarkan NIM via GetMahasiswaProgram.
+    Ambil data program/registrasi mahasiswa berdasarkan NIM via GetListMahasiswa.
     Return dict dengan field: id_mahasiswa, id_registrasi, nim_mahasiswa,
     jenjang_didik, tahun_masuk, tanggal_lulus, nama_program_studi, dsb.
     Raise exception jika tidak ditemukan atau timeout.
     """
     token = get_token()
     payload = {
-        "act": "GetMahasiswaProgram",
+        "act": "GetListMahasiswa",
         "token": token,
         "filter": f"a.nim_mahasiswa='{nim}'",
     }
@@ -154,14 +157,14 @@ def get_program_mahasiswa(nim: str) -> dict:
         if len(data) == 0:
             raise ValueError(
                 f"Mahasiswa dengan NIM '{nim}' tidak ditemukan di Feeder "
-                f"(GetMahasiswaProgram kosong)."
+                f"(GetListMahasiswa kosong)."
             )
         # Ambil entri terakhir (registrasi terbaru)
         data = data[-1]
 
     if not isinstance(data, dict):
         raise ValueError(
-            f"Format response GetMahasiswaProgram tidak terduga: {response}"
+            f"Format response GetListMahasiswa tidak terduga: {response}"
         )
 
     return data
@@ -170,7 +173,7 @@ def get_program_mahasiswa(nim: str) -> dict:
 def get_biodata_mahasiswa(nim: str) -> dict:
     """
     Ambil biodata lengkap mahasiswa berdasarkan NIM.
-    Flow: GetMahasiswaProgram → ambil id_mahasiswa → GetBiodataMahasiswa.
+    Flow: GetListMahasiswa → ambil id_mahasiswa → GetBiodataMahasiswa.
     Menggabungkan data program (jenjang, angkatan, tanggal_lulus) ke dalam hasil.
     """
     # Step 1: data program (mengandung id_mahasiswa + data akademik)
@@ -181,12 +184,12 @@ def get_biodata_mahasiswa(nim: str) -> dict:
         or program.get('id_mhs')
     )
     if not id_mahasiswa:
-        # Jika GetMahasiswaProgram sudah ada nama_mahasiswa, kembalikan langsung
+        # Jika GetListMahasiswa sudah ada nama_mahasiswa, kembalikan langsung
         if program.get('nama_mahasiswa'):
-            logger.info(f"GetMahasiswaProgram sudah mengandung biodata untuk NIM {nim}")
+            logger.info(f"GetListMahasiswa sudah mengandung biodata untuk NIM {nim}")
             return program
         raise ValueError(
-            f"GetMahasiswaProgram tidak mengembalikan id_mahasiswa untuk NIM '{nim}'. "
+            f"GetListMahasiswa tidak mengembalikan id_mahasiswa untuk NIM '{nim}'. "
             f"Field tersedia: {list(program.keys())}"
         )
 
@@ -219,8 +222,10 @@ def get_biodata_mahasiswa(nim: str) -> dict:
 
 def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     """
-    Ambil daftar nilai perkuliahan mahasiswa berdasarkan NIM.
-    Coba filter by id_registrasi (dari GetMahasiswaProgram), fallback ke nim_mahasiswa.
+    Ambil daftar riwayat nilai mahasiswa berdasarkan NIM via GetRiwayatNilaiMahasiswa.
+    Filter by id_registrasi (dari GetListMahasiswa), fallback ke nim_mahasiswa.
+    Return list of dict dengan field: kode_mata_kuliah, nama_mata_kuliah,
+    sks_mata_kuliah, nilai_lambang, nilai_angka.
     """
     token = get_token()
 
@@ -238,13 +243,13 @@ def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     # Pilih filter terbaik
     if id_registrasi:
         filter_str = f"a.id_registrasi='{id_registrasi}'"
-        logger.info(f"GetNilaiPerkuliahanMahasiswa filter by id_registrasi={id_registrasi}")
+        logger.info(f"GetRiwayatNilaiMahasiswa filter by id_registrasi={id_registrasi}")
     else:
         filter_str = f"a.nim_mahasiswa='{nim}'"
-        logger.info(f"GetNilaiPerkuliahanMahasiswa fallback filter by nim_mahasiswa={nim}")
+        logger.info(f"GetRiwayatNilaiMahasiswa fallback filter by nim_mahasiswa={nim}")
 
     payload = {
-        "act": "GetNilaiPerkuliahanMahasiswa",
+        "act": "GetRiwayatNilaiMahasiswa",
         "token": token,
         "filter": filter_str,
     }
