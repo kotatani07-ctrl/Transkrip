@@ -1,7 +1,13 @@
 """
 Integrasi dengan Neo Feeder PDDIKTI.
-Read-only: hanya memanggil GetToken, GetBiodataMahasiswa, GetNilaiPerkuliahanMahasiswa.
+Read-only: hanya memanggil GetToken, GetMahasiswaProgram, GetBiodataMahasiswa,
+GetNilaiPerkuliahanMahasiswa.
 TIDAK mengimplementasi fungsi Insert/Update/Delete apapun.
+
+Flow pencarian per NIM:
+  1. GetMahasiswaProgram  (filter: a.nim_mahasiswa)  → id_mahasiswa, id_registrasi, data program
+  2. GetBiodataMahasiswa  (filter: a.id_mahasiswa)   → nama, tempat/tanggal lahir, dsb.
+  3. GetNilaiPerkuliahanMahasiswa (filter: a.id_registrasi) → daftar nilai
 """
 import base64
 import json
@@ -21,7 +27,8 @@ _token_cache = {
 }
 _token_lock = Lock()
 
-BUFFER_MENIT = 5  # refresh token 5 menit sebelum expired
+BUFFER_MENIT = 5        # refresh token 5 menit sebelum expired
+TIMEOUT_DETIK = 90      # timeout per request ke Feeder
 
 
 def _decode_jwt_payload(token: str) -> dict:
@@ -31,7 +38,6 @@ def _decode_jwt_payload(token: str) -> dict:
         if len(parts) != 3:
             return {}
         payload_b64 = parts[1]
-        # Tambah padding jika perlu
         padding = 4 - len(payload_b64) % 4
         if padding != 4:
             payload_b64 += '=' * padding
@@ -45,7 +51,7 @@ def _decode_jwt_payload(token: str) -> dict:
 def _get_feeder_url() -> str:
     host = settings.FEEDER_HOST
     if not host:
-        raise ValueError("FEEDER_HOST belum dikonfigurasi di .env")
+        raise ValueError("FEEDER_HOST belum dikonfigurasi di environment secrets")
     return f"http://{host}:3003/ws/live2.php"
 
 
@@ -55,12 +61,17 @@ def _call_feeder(payload: dict) -> dict:
     Return dict response atau raise exception.
     """
     url = _get_feeder_url()
+    # Connection: close mencegah reuse koneksi yang sudah expired
+    headers = {
+        'Content-Type': 'application/json',
+        'Connection': 'close',
+    }
     try:
         resp = requests.post(
             url,
             json=payload,
-            headers={'Content-Type': 'application/json'},
-            timeout=30,
+            headers=headers,
+            timeout=TIMEOUT_DETIK,
         )
         resp.raise_for_status()
         data = resp.json()
@@ -71,9 +82,13 @@ def _call_feeder(payload: dict) -> dict:
             f"Pastikan FEEDER_HOST sudah benar dan server aktif. Detail: {e}"
         )
     except requests.exceptions.Timeout:
-        raise TimeoutError("Koneksi ke Neo Feeder timeout (>30 detik).")
+        raise TimeoutError(
+            f"Koneksi ke Neo Feeder timeout (>{TIMEOUT_DETIK} detik) "
+            f"saat memanggil '{payload.get('act', '?')}'. "
+            f"Server mungkin sedang lambat atau endpoint tidak merespons dari jaringan ini."
+        )
     except Exception as e:
-        raise RuntimeError(f"Error memanggil Neo Feeder: {e}")
+        raise RuntimeError(f"Error memanggil Neo Feeder '{payload.get('act', '?')}': {e}")
 
 
 def get_token() -> str:
@@ -85,11 +100,9 @@ def get_token() -> str:
         now = time.time()
         buffer_seconds = BUFFER_MENIT * 60
 
-        # Gunakan cache jika masih valid
         if _token_cache['token'] and _token_cache['exp'] - now > buffer_seconds:
             return _token_cache['token']
 
-        # Request token baru
         logger.info("Mengambil token baru dari Neo Feeder...")
         payload = {
             "act": "GetToken",
@@ -100,7 +113,6 @@ def get_token() -> str:
 
         token = None
         if isinstance(response, dict):
-            # Coba berbagai path response yang mungkin
             token = (
                 response.get('data', {}).get('token')
                 or response.get('token')
@@ -112,9 +124,8 @@ def get_token() -> str:
                 f"GetToken tidak mengembalikan token. Response: {response}"
             )
 
-        # Decode exp dari JWT payload
         payload_data = _decode_jwt_payload(token)
-        exp = payload_data.get('exp', now + 3600)  # default 1 jam jika tidak ada
+        exp = payload_data.get('exp', now + 3600)
 
         _token_cache['token'] = token
         _token_cache['exp'] = exp
@@ -122,43 +133,120 @@ def get_token() -> str:
         return token
 
 
-def get_biodata_mahasiswa(nim: str) -> dict:
+def get_program_mahasiswa(nim: str) -> dict:
     """
-    Ambil biodata mahasiswa berdasarkan NIM.
-    Return dict biodata atau raise exception.
+    Ambil data program/registrasi mahasiswa berdasarkan NIM via GetMahasiswaProgram.
+    Return dict dengan field: id_mahasiswa, id_registrasi, nim_mahasiswa,
+    jenjang_didik, tahun_masuk, tanggal_lulus, nama_program_studi, dsb.
+    Raise exception jika tidak ditemukan atau timeout.
     """
     token = get_token()
     payload = {
-        "act": "GetBiodataMahasiswa",
+        "act": "GetMahasiswaProgram",
         "token": token,
-        "filter": f"a.id_mahasiswa='{nim}'",
+        "filter": f"a.nim_mahasiswa='{nim}'",
     }
     response = _call_feeder(payload)
 
-    # Normalisasi response
     data = response.get('data', response) if isinstance(response, dict) else response
 
     if isinstance(data, list):
         if len(data) == 0:
-            raise ValueError(f"Mahasiswa dengan NIM '{nim}' tidak ditemukan di Feeder.")
-        data = data[0]
+            raise ValueError(
+                f"Mahasiswa dengan NIM '{nim}' tidak ditemukan di Feeder "
+                f"(GetMahasiswaProgram kosong)."
+            )
+        # Ambil entri terakhir (registrasi terbaru)
+        data = data[-1]
 
     if not isinstance(data, dict):
-        raise ValueError(f"Format response GetBiodataMahasiswa tidak terduga: {response}")
+        raise ValueError(
+            f"Format response GetMahasiswaProgram tidak terduga: {response}"
+        )
 
     return data
+
+
+def get_biodata_mahasiswa(nim: str) -> dict:
+    """
+    Ambil biodata lengkap mahasiswa berdasarkan NIM.
+    Flow: GetMahasiswaProgram → ambil id_mahasiswa → GetBiodataMahasiswa.
+    Menggabungkan data program (jenjang, angkatan, tanggal_lulus) ke dalam hasil.
+    """
+    # Step 1: data program (mengandung id_mahasiswa + data akademik)
+    program = get_program_mahasiswa(nim)
+
+    id_mahasiswa = (
+        program.get('id_mahasiswa')
+        or program.get('id_mhs')
+    )
+    if not id_mahasiswa:
+        # Jika GetMahasiswaProgram sudah ada nama_mahasiswa, kembalikan langsung
+        if program.get('nama_mahasiswa'):
+            logger.info(f"GetMahasiswaProgram sudah mengandung biodata untuk NIM {nim}")
+            return program
+        raise ValueError(
+            f"GetMahasiswaProgram tidak mengembalikan id_mahasiswa untuk NIM '{nim}'. "
+            f"Field tersedia: {list(program.keys())}"
+        )
+
+    # Step 2: biodata personal via id_mahasiswa
+    token = get_token()
+    payload = {
+        "act": "GetBiodataMahasiswa",
+        "token": token,
+        "filter": f"a.id_mahasiswa='{id_mahasiswa}'",
+    }
+    try:
+        response = _call_feeder(payload)
+        biodata = response.get('data', response) if isinstance(response, dict) else response
+
+        if isinstance(biodata, list):
+            biodata = biodata[0] if biodata else {}
+        if not isinstance(biodata, dict):
+            biodata = {}
+    except Exception as e:
+        logger.warning(f"GetBiodataMahasiswa gagal untuk {nim}: {e}. Menggunakan data program saja.")
+        biodata = {}
+
+    # Gabungkan: program data sebagai base, biodata melengkapi
+    merged = {**program, **biodata}
+    # Pastikan nim_mahasiswa selalu ada
+    if 'nim_mahasiswa' not in merged:
+        merged['nim_mahasiswa'] = nim
+    return merged
 
 
 def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     """
     Ambil daftar nilai perkuliahan mahasiswa berdasarkan NIM.
-    Return list nilai atau raise exception.
+    Coba filter by id_registrasi (dari GetMahasiswaProgram), fallback ke nim_mahasiswa.
     """
     token = get_token()
+
+    # Coba dapatkan id_registrasi dari data program
+    id_registrasi = None
+    try:
+        program = get_program_mahasiswa(nim)
+        id_registrasi = (
+            program.get('id_registrasi')
+            or program.get('id_reg')
+        )
+    except Exception as e:
+        logger.warning(f"Tidak bisa ambil id_registrasi untuk {nim}: {e}")
+
+    # Pilih filter terbaik
+    if id_registrasi:
+        filter_str = f"a.id_registrasi='{id_registrasi}'"
+        logger.info(f"GetNilaiPerkuliahanMahasiswa filter by id_registrasi={id_registrasi}")
+    else:
+        filter_str = f"a.nim_mahasiswa='{nim}'"
+        logger.info(f"GetNilaiPerkuliahanMahasiswa fallback filter by nim_mahasiswa={nim}")
+
     payload = {
         "act": "GetNilaiPerkuliahanMahasiswa",
         "token": token,
-        "filter": f"a.id_mahasiswa='{nim}'",
+        "filter": filter_str,
     }
     response = _call_feeder(payload)
 
@@ -166,14 +254,10 @@ def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
 
     if data is None:
         return []
-
     if isinstance(data, list):
         return data
-
-    # Jika single dict, bungkus dalam list
     if isinstance(data, dict):
         return [data]
-
     return []
 
 
