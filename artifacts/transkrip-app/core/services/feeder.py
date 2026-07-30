@@ -122,20 +122,88 @@ def get_token() -> str:
         return token
 
 
+def _build_biodata_payloads(nim: str) -> list[dict]:
+    """Bangun daftar payload alternatif untuk GetBiodataMahasiswa."""
+    payloads = []
+    filters = [
+        f"a.id_mahasiswa={nim}",
+        f"a.id_mahasiswa='{nim}'",
+        f"id_mahasiswa={nim}",
+        f"id_mahasiswa='{nim}'",
+        f"a.nim={nim}",
+        f"a.nim='{nim}'",
+        f"nim={nim}",
+        f"nim='{nim}'",
+        f"a.nik={nim}",
+        f"a.nik='{nim}'",
+        f"nik={nim}",
+        f"nik='{nim}'",
+        f"a.nama_mahasiswa='{nim}'",
+        f"nama_mahasiswa='{nim}'",
+    ]
+    for filt in filters:
+        payloads.append({"filter": filt})
+
+    # Tambahkan payload yang menggunakan parameter langsung jika filter tidak cocok
+    payloads.extend([
+        {"nim": nim},
+        {"id_mahasiswa": nim},
+        {"nim_mahasiswa": nim},
+        {"nama_mahasiswa": nim},
+    ])
+    return payloads
+
+
+def _call_with_payloads(act: str, nim: str) -> dict:
+    token = get_token()
+    last_error = None
+
+    if act == "GetBiodataMahasiswa":
+        payload_candidates = _build_biodata_payloads(nim)
+    else:
+        payload_candidates = [
+            {"filter": f"a.nim_mahasiswa='{nim}'"},
+            {"filter": f"a.nik='{nim}'"},
+            {"filter": f"nim='{nim}'"},
+            {"filter": f"nik='{nim}'"},
+            {"nim": nim},
+            {"id_mahasiswa": nim},
+            {"nik": nim},
+        ]
+
+    for extra in payload_candidates:
+        payload = {
+            "act": act,
+            "token": token,
+            **extra,
+        }
+        try:
+            response = _call_feeder(payload)
+        except Exception as e:
+            logger.warning("Feeder call failed for payload %s: %s", extra, e)
+            last_error = e
+            continue
+
+        if isinstance(response, dict) and response.get('error_code'):
+            logger.warning("Feeder returned error for payload %s: %s", extra, response)
+            last_error = RuntimeError(f"Feeder error: {response}")
+            continue
+
+        return response
+
+    if last_error:
+        raise last_error
+
+    raise RuntimeError(f"Gagal memanggil {act}: tidak ada response valid dari Feeder.")
+
+
 def get_biodata_mahasiswa(nim: str) -> dict:
     """
     Ambil biodata mahasiswa berdasarkan NIM.
     Return dict biodata atau raise exception.
     """
-    token = get_token()
-    payload = {
-        "act": "GetBiodataMahasiswa",
-        "token": token,
-        "filter": f"a.nim_mahasiswa='{nim}'",
-    }
-    response = _call_feeder(payload)
+    response = _call_with_payloads("GetBiodataMahasiswa", nim)
 
-    # Normalisasi response
     data = response.get('data', response) if isinstance(response, dict) else response
 
     if isinstance(data, list):
@@ -143,10 +211,10 @@ def get_biodata_mahasiswa(nim: str) -> dict:
             raise ValueError(f"Mahasiswa dengan NIM '{nim}' tidak ditemukan di Feeder.")
         data = data[0]
 
-    if not isinstance(data, dict):
-        raise ValueError(f"Format response GetBiodataMahasiswa tidak terduga: {response}")
+    if isinstance(data, dict):
+        return data
 
-    return data
+    raise ValueError(f"Format response GetBiodataMahasiswa tidak terduga: {response}")
 
 
 def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
@@ -154,13 +222,7 @@ def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     Ambil daftar nilai perkuliahan mahasiswa berdasarkan NIM.
     Return list nilai atau raise exception.
     """
-    token = get_token()
-    payload = {
-        "act": "GetNilaiPerkuliahanMahasiswa",
-        "token": token,
-        "filter": f"a.nim_mahasiswa='{nim}'",
-    }
-    response = _call_feeder(payload)
+    response = _call_with_payloads("GetNilaiPerkuliahanMahasiswa", nim)
 
     data = response.get('data', response) if isinstance(response, dict) else response
 
@@ -170,7 +232,6 @@ def get_nilai_perkuliahan_mahasiswa(nim: str) -> list:
     if isinstance(data, list):
         return data
 
-    # Jika single dict, bungkus dalam list
     if isinstance(data, dict):
         return [data]
 
