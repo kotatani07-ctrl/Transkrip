@@ -1,0 +1,214 @@
+Web Service
+GetToken: Mendapatkan token
+GetDictionary: Mendapatkan dictionary fungsi ws
+GetAllPT: Mendapatkan semua data perguruan tinggi
+GetProfilPT: Mendapatkan profil PT
+GetAllProdi: Mendapatkan semua data program studi
+GetProdi: Mendapatkan program studi
+GetPeriode: Mendapatkan periode aktif
+GetFakultas: Mendapatkan fakultas
+GetListKomponenEvaluasiKelas: Mendapatkan semua data kelas komponen evaluasi
+DeleteKomponenEvaluasiKelas: Menghapus komponen evaluasi
+GetListMahasiswa: Mendapatkan daftar mahasiswa
+GetListDaftarLampau: Mendapatkan daftar mahasiswa periode lampau
+GetBiodataMahasiswa: Mendapatkan biodata mahasiswa
+InsertBiodataMahasiswa: Menambah biodata mahasiswa
+UpdateBiodataMahasiswa: Mengubah biodata mahasiswa
+DeleteBiodataMahasiswa: Menghapus biodata mahasiswa
+GetDataLengkapMahasiswaProdi: Mendapatkan data lengkap mahasiswa prodi
+GetListRiwayatPendidikanMahasiswa: Mendapatkan daftar riwayat pendidikan mahasiswa
+InsertRiwayatPendidikanMahasiswa: Menambah riwayat pendidikan mahasiswa
+UpdateRiwayatPendidikanMahasiswa: Mengubah riwayat pendidikan mahasiswa
+DeleteRiwayatPendidikanMahasiswa: Menghapus riwayat pendidikan mahasiswa
+GetListPerubahanRiwayatPendidikan: Mendapatkan list perubahan prodi
+InsertPerubahanRiwayatPendidikan: Mengubah fakultas yang mengampu menjadi program studi
+UpdatePerubahanRiwayatPendidikan: Mengubah hasil dari ubah fakultas ke program studi
+GetNilaiTransferPendidikanMahasiswa: Mendapatkan nilai transfer mahasiswa
+InsertNilaiTransferPendidikanMahasiswa: Menambah nilai transfer mahasiswa
+UpdateNilaiTransferPendidikanMahasiswa: Mengubah nilai transfer mahasiswa
+DeleteNilaiTransferPendidikanMahasiswa: Menghapus nilai transfer mahasiswa
+GetKRSMahasiswa: Mendapatkan KRS mahasiswa
+GetRiwayatNilaiMahasiswa: Mendapatkan riwayat nilai mahasiswa
+GetAktivitasKuliahMahasiswa: Mendapatkan aktivitas kuliah mahasiswa
+GetTranskripMahasiswa: Mendapatkan transkrip mahasiswa
+InsertTranskripMahasiswa: Menambah data transkrip mahasiswa
+DeleteTranskripMahasiswa: Menghapus transkrip mahasiswa
+HitungTranskripAngkatan: Menghitung transkrip mahasiswa per angkatan pada tiap program studi
+GetDataTerhapus: Mendapatkan biodata mahasiswa yang sudah terhapus
+GetListBidangMinat: Mendapatkan data bidang minat PT
+GetListDosen: Mendapatkan daftar dosen
+DetailBiodataDosen: Mendapatkan detail biodata dosen
+GetListPenugasanDosen: Mendapatkan daftar penugasan dosen
+GetAktivitasMengajarDosen: Mendapatkan daftar aktivitas mengajar dosen
+GetRiwayatFungsionalDosen: Mendapatkan daftar riwayat fungsional dosen
+GetRiwayatPangkatDosen: Mendapatkan daftar riwayat pangkat golongan dosen
+GetRiwayatPendidikanDosen: Mendapatkan daftar riwayat pendidikan dosen
+GetRiwayatSertifikasiDosen: Mendapatkan daftar riwayat sertifikasi dosen
+GetRiwayatPenelitianDosen: Mendapatkan daftar riewayat penelitian dosen
+GetMahasiswaBimbinganDosen: Mendapatkan daftar mahasiswa bimbingan dosen
+GetListPenugasanSemuaDosen: Mendapatkan daftar semua penugasan dosen
+GetDetailPenugasanDosen: Mendapatkan detail penugasan dosen
+GetListMataKuliah: Mendapatkan daftar mata kuliah
+GetDetailMataKuliah: Mendapatkan detail mata kuliah
+InsertMataKuliah: Menambah mata kuliah
+UpdateMataKuliah: Mengubah mata kuliah
+DeleteMataKuliah: Menghapus mata kuliah
+GetListSubstansiKuliah: Mendapatkan substansi kuliah
+InsertSubstansiKuliah: Menambah substansi kuliah
+UpdateSubstansiKuliah: Mengubah substansi kuliah
+DeleteSubstansiKuliah: Menghapus substansi kuliah
+GetListRencanaPembelajaran: Mendapatkan daftar rencana pembelajaran
+InsertRencanaPembelajaran: Menambah rencana pembelajaran
+UpdateRencanaPembelajaran: Mengubah rencana pembelajaran
+DeleteRencanaPembelajaran: Menghapus rencana pembelajaran
+GetListRencanaEvaluasi: Mendapatkan daftar rencana evaluasi
+InsertRencanaEvaluasi: Menambah rencana evaluasi
+UpdateRencanaEvaluasi: Mengubah rencana evaluasi
+DeleteRencanaEvaluasi: Menghapus rencana evaluasi
+GetListKurikulum: Mendapatkan daftar kurikulum
+GetDetailKurikulum: Mendapatkan detail kurikulum
+InsertKurikulum: Menambah kurikulum
+UpdateKurikulum: Mengubah kurikulum
+DeleteKurikulum: Menghapus kurikulum
+GetMatkulKurikulum: Mendapatkan mata kuliah kurikulum
+InsertMatkulKurikulum: Menambah mata kuliah kurikulum
+DeleteMatkulKurikulum: Menghapus mata kuliah kurikulum
+GetListKelasKuliah: Mendapatkan daftar kelas kuliah
+GetDetailKelasKuliah: Mendapatkan detail kelas kuliah
+InsertKelasKuliah: Menambah kelas kuliah
+UpdateKelasKuliah: Mengubah kelas kuliah
+DeleteKelasKuliah: Menghapus kelas kuliah
+GetDosenPengajarKelasKuliah: Mendapatkan detail dosen pengajar kelas kuliah
+InsertDosenPengajarKelasKuliah: Menambah dosen pengajar kelas kuliah
+UpdateDosenPengajarKelasKuliah: Mengubah dosen pengajar kelas kuliah
+DeleteDosenPengajarKelasKuliah: Menghapus dosen pengajar kelas kuliah
+GetPerhitunganSKS: Mendapatkan perhitungan sks
+GetPesertaKelasKuliah: Mendapatkan detail peserta kelas kuliah
+InsertPesertaKelasKuliah: Menambah peserta kelas kuliah
+DeletePesertaKelasKuliah: Menghapus peserta kelas kuliah
+GetListNilaiPerkuliahanKelas: Mendapatkan daftar nilai kelas perkuliahan
+GetDetailNilaiPerkuliahanKelas: Mendapatkan detail nilai kelas perkuliahan
+UpdateNilaiPerkuliahanKelas: Menambahkan nilai kelas perkuliahan
+GetListPerkuliahanMahasiswa: Mendapatkan daftar aktivitas kuliah mahasiswa
+GetDetailPerkuliahanMahasiswa: Mendapatkan detail aktivitas kuliah mahasiswa
+InsertPerkuliahanMahasiswa: Menambah aktivitas kuliah mahasiswa
+UpdatePerkuliahanMahasiswa: Mengubah aktivitas kuliah mahasiswa
+DeletePerkuliahanMahasiswa: Menghapus aktivitas kuliah mahasiswa
+GetListMahasiswaLulusDO: Mendapatkan daftar mahasiswa lulus / DO
+GetDetailMahasiswaLulusDO: Mendapatkan detail mahasiswa lulus / DO
+InsertMahasiswaLulusDO: Menambah mahasiswa lulus / DO
+UpdateMahasiswaLulusDO: Mengubah data mahasiswa lulus / DO
+DeleteMahasiswaLulusDO: Menghapus mahasiswa lulus / DO
+GetDosenPembimbing: Mendapatkan daftar dosen pembimbing mahasiswa
+InsertDosenPembimbing: Menambah dosen pembimbing
+DeleteDosenPembimbing: Menghapus dosen pembimbing
+GetListSkalaNilaiProdi: Mendapatkan daftar skala nilai prodi
+GetDetailSkalaNilaiProdi: Mendapatkan detail skala nilai prodi
+InsertSkalaNilaiProdi: Menambah skala nilai prodi
+UpdateSkalaNilaiProdi: Mengubah skala nilai prodi
+DeleteSkalaNilaiProdi: Menghapus skala nilai prodi
+GetListPeriodePerkuliahan: Mendapatkan daftar daya tampung mahasiswa baru
+GetDetailPeriodePerkuliahan: Mendapatkan detail daya tampung mahasiswa baru
+InsertPeriodePerkuliahan: Menambah periode perkuliahan
+UpdatePeriodePerkuliahan: Mengubah periode perkuliahan
+DeletePeriodePerkuliahan: Menghapus periode perkuliahan
+GetListPrestasiMahasiswa: Mendapatkan daftar prestasi mahasiswa
+InsertPrestasiMahasiswa: Menambah data prestasi mahasiswa
+UpdatePrestasiMahasiswa: Mengubah data prestasi mahasiswa
+DeletePrestasiMahasiswa: Menghapus data prestasi mahasiswa
+GetListKonversiKampusMerdeka: Mendapatkan daftar konversi nilai dari aktivitas kampus merdeka (non pertukaran pelajar)
+InsertKonversiKampusMerdeka: Menambah data konversi nilai aktivitas kampus merdeka (non pertukaran pelajar)
+UpdateKonversiKampusMerdeka: Mengubah data konversi nilai aktivitas kampus merdeka (non pertukaran pelajar)
+DeleteKonversiKampusMerdeka: Menghapus data konversi nilai aktivitas kampus merdeka (non pertukaran pelajar)
+GetListAktivitasMahasiswa: Mendapatkan daftar aktivitas mahasiswa
+InsertAktivitasMahasiswa: Menambah data aktivitas mahasiswa
+UpdateAktivitasMahasiswa: Mengubah data aktivitas mahasiswa
+DeleteAktivitasMahasiswa: Menghapus data aktivitas mahasiswa
+GetListAnggotaAktivitasMahasiswa: Mendapatkan daftar anggota aktivitas mahasiswa
+InsertAnggotaAktivitasMahasiswa: Menambah data anggota aktivitas mahasiswa
+DeleteAnggotaAktivitasMahasiswa: Menghapus data anggota aktivitas mahasiswa
+GetListBimbingMahasiswa: Mendapatkan daftar bimbing mahasiswa
+InsertBimbingMahasiswa: Menambah data bimbing mahasiswa
+UpdateBimbingMahasiswa: Mengubah data bimbing mahasiswa
+DeleteBimbingMahasiswa: Menghapus data bimbing mahasiswa
+GetListUjiMahasiswa: Mendapatkan daftar uji mahasiswa
+InsertUjiMahasiswa: Menambah data uji mahasiswa
+UpdateUjiMahasiswa: Mengubah data uji mahasiswa
+DeleteUjiMahasiswa: Menghapus data uji mahasiswa
+GetRekapLaporan: Mendapatkan rekapitulasi pelaporan
+GetRekapJumlahDosen: Mendapatkan rekapitulasi pelaporan jumlah dosen
+GetRekapJumlahMahasiswa: Mendapatkan rekapitulasi pelaporan jumlah mahasiswa
+GetRekapIPSMahasiswa: Mendapatkan rekapitulasi pelaporan ips mahasiswa
+GetRekapKRSMahasiswa: Mendapatkan rekapitulasi pelaporan krs mahasiswa
+GetRekapKHSMahasiswa: Mendapatkan rekapitulasi pelaporan khs mahasiswa
+ExportDataMahasiswa: Mengekspor data mahasiswa pt
+ExportDataNilaiTransfer: Mengekspor data nilai transfer mahasiswa
+ExportDataPenugasanDosenProdi: Mengekspor daftar penugasan dosen per prodi
+ExportDataMatkulProdi: Mengekspor data mata kuliah
+ExportDataKelasPerkuliahan: Mengekspor data jadwal dan kelas perkuliahan
+ExportDataMahasiswaKRS: Mengekspor data krs mahasiswa
+ExportDataMengajarDosen: Mengekspor data mengajar dosen
+ExportDataAktivitasKuliah: Mengekspor data aktivitas kuliah mahasiswa
+ExportDataMahasiswaLulus: Mengekspor data mahasiswa lulus
+GetAgama: Mendapatkan agama
+GetBentukPendidikan: Mendapatkan bentuk pendidikan
+GetIkatanKerjaSdm: Mendapatkan ikatan kerja sdm
+GetJabfung: Mendapatkan jabatan fungsional
+GetJalurMasuk: Mendapatkan jalur masuk
+GetJenisEvaluasi: Mendapatkan jenis evaluasi
+GetJenisKeluar: Mendapatkan jenis keluar
+GetJenisSertifikasi: Mendapatkan jenis seritifikasi
+GetJenisPendaftaran: Mendapatkan jenis pendaftaran
+GetJenisSMS: Mendapatkan jenis SMS
+GetJenisSubstansi: Mendapatkan jenis substansi
+GetJenisTinggal: Mendapatkan jenis tinggal
+GetJenjangPendidikan: Mendapatkan jenjang pendidikan
+GetKebutuhanKhusus: Mendapatkan kebutuhan khusus
+GetLembagaPengangkat: Mendapatkan lembaga pengangkat
+GetLevelWilayah: Mendapatkan level wilayah
+GetNegara: Mendapatkan negara
+GetPangkatGolongan: Mendapatkan pangkat golongan
+GetPekerjaan: Mendapatkan pekerjaan
+GetPenghasilan: Mendapatkan penghasilan
+GetSemester: Mendapatkan semester
+GetStatusKeaktifanPegawai: Mendapatkan status keaktifan pegawai
+GetStatusKepegawaian: Mendapatkan status kepegawaian
+GetStatusMahasiswa: Mendapatkan status mahasiswa
+GetTahunAjaran: Mendapatkan tahun ajaran
+GetWilayah: Mendapatkan wilayah
+GetAlatTransportasi: Mendaptakan alat transportasi
+GetPembiayaan: Mendaptakan pembiayaan
+GetJenisPrestasi: Mendaptakan jenis prestasi
+GetTingkatPrestasi: Mendaptakan tingkat prestasi
+GetJenisAktivitasMahasiswa: Mendaptakan jenis aktivitas mahasiswa
+GetKategoriKegiatan: Mendaptakan kategori kegiatan
+GetPeriodeLampau: Mendapatkan pembukaan periode lampau
+GetCountAktivitasMahasiswa: Mendapatkan jumlah data aktivitas mahasiswa
+GetCountPrestasiMahasiswa: Mendapatkan jumlah data prestasi mahasiswa
+GetCountMahasiswa: Menghitung jumlah data mahasiswa
+GetCountRiwayatPendidikanMahasiswa: Menghitung jumlah data riwayat pendidikan mahasiswa
+GetCountNilaiTransferPendidikanMahasiswa: Menghitung jumlah data nilai transfer mahasiswa
+GetCountRiwayatNilaiMahasiswa: Menghitung jumlah data riwayat nilai mahasiswa
+GetCountDosen: Menghitung jumlah data dosen
+GetCountPenugasanSemuaDosen: Menghitung jumlah data penugasan semua dosen
+GetCountAktivitasMengajarDosen: Menghitung jumlah data aktivitas mengajar dosen
+GetCountSkalaNilaiProdi: Menghitung jumlah data skala nilai prodi
+GetCountPeriodePerkuliahan: Menghitung jumlah data periode perkuliahan
+GetCountDosenPembimbing: Menghitung jumlah data dosen pembimbing
+GetCountKelasKuliah: Menghitung jumlah data kelas perkuliahan
+GetCountKurikulum: Menghitung jumlah data kurikulum perkuliahan
+GetCountMataKuliah: Menghitung jumlah data mata kuliah
+GetCountMatkulKurikulum: Menghitung jumlah data mata kuliah kurikulum
+GetCountNilaiPerkuliahanKelas: Menghitung jumlah data nilai perkuliahan
+GetCountSubstansiKuliah: Menghitung jumlah data substansi kuliah
+GetCountPerguruanTinggi: Menghitung jumlah data semua perguruan tinggi
+GetCountProdi: Menghitung jumlah data semua program studi
+GetCountDosenPengajarKelasKuliah: Menghitung jumlah data dosen pengajar kelas kuliah
+GetCountMahasiswaLulusDO: Menghitung jumlah data mahasiswa lulus / DO
+GetCountPesertaKelasKuliah: Menghitung jumlah data peserta kelas perkuliahan
+GetCountPerkuliahanMahasiswa: Menghitung jumlah data perkuliahan mahasiswa
+GetCountMahasiswaBimbinganDosen: Menghitung jumlah data mahasiswa bimbingan dosen
+GetCountKonversiKampusMerdeka: Menghitung jumlah data pemadanan mata kuliah dengan aktivitas kampus merdeka (non pertukaran pelajar)
+GetCountRencanaPembelajaran: Menghitung jumlah data rencana pembelajaran
+GetCountRencanaEvaluasi: Menghitung jumlah data rencana evaluasi
+GetCountBiodataMahasiswa: Menghitung jumlah data biodata mahasiswa
