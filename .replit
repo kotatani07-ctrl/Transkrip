@@ -24,7 +24,6 @@ channel = "stable-25_05"
 [userenv.shared]
 DEBUG = "True"
 DEFAULT_NAMA_DEKAN = "Nama Dekan"
-SECRET_KEY = "*&=^0f$jl=#b$ey67elfuu+-tbt91yc%4m9i3wvqwjs7(ix#bx"
 
 [workflows]
 runButton = "Project"
