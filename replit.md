@@ -1,62 +1,71 @@
 # Transkrip & Ijazah
 
-Aplikasi web Django untuk generate transkrip akademik mahasiswa dari Neo Feeder PDDIKTI.
-
-## Stack
-
-- **Backend**: Django 5.2 (Python)
-- **Database**: SQLite (`artifacts/transkrip-app/db.sqlite3`)
-- **Frontend**: Template HTML + Tailwind CSS + Vite (dibangun sebagai static files)
-- **External**: Neo Feeder PDDIKTI (server lokal kampus, port 3003)
+Aplikasi Django untuk generate transkrip akademik mahasiswa dari data **Neo Feeder PDDIKTI**, dicocokkan dengan kurikulum, dan diekspor ke Excel.
 
 ## Cara Menjalankan
 
-Workflow: **artifacts/transkrip-app: web**
-Script: `bash /home/runner/workspace/artifacts/transkrip-app/run.sh`
+Workflow `Start application` sudah dikonfigurasi. Klik **Run** atau restart workflow untuk menjalankan.
 
-`run.sh` otomatis menjalankan migrasi DB, membuat superuser default, lalu menjalankan Django dev server.
+Workflow menjalankan: `cd artifacts/transkrip-app && PORT=23524 bash run.sh`
 
-## Environment Variables / Secrets
-
-| Key | Jenis | Keterangan |
-|---|---|---|
-| `SECRET_KEY` | Secret | Django secret key |
-| `DEBUG` | Env Var | `True` untuk development |
-| `ALLOWED_HOSTS` | Env Var | Host yang diizinkan |
-| `FEEDER_HOST` | Secret | IP server Neo Feeder kampus |
-| `FEEDER_USERNAME` | Secret | Username Neo Feeder |
-| `FEEDER_PASSWORD` | Secret | Password Neo Feeder |
-| `DEFAULT_NAMA_DEKAN` | Env Var | Nama dekan default di transkrip |
+`run.sh` otomatis:
+1. Membaca env vars dari Replit Secrets
+2. Menjalankan migrasi database
+3. Membuat superuser `admin` jika belum ada
+4. Menjalankan Django dev server di port `$PORT`
 
 ## Akun Default
 
-- **Username**: `admin`
-- **Password**: `admin123`
-- Ganti password via: `python manage.py changepassword admin`
+| Field    | Nilai     |
+|----------|-----------|
+| Username | `admin`   |
+| Password | `admin123` |
 
-## Struktur Aplikasi
+⚠️ Ganti password sebelum dipakai di lingkungan publik.
+
+## Environment Variables (Replit Secrets)
+
+| Key                  | Keterangan                                      |
+|----------------------|-------------------------------------------------|
+| `SECRET_KEY`         | Django secret key (sudah di-set)                |
+| `FEEDER_HOST`        | IP/hostname server Neo Feeder                   |
+| `FEEDER_USERNAME`    | Username Neo Feeder                             |
+| `FEEDER_PASSWORD`    | Password Neo Feeder                             |
+| `DEBUG`              | `True` (development)                            |
+| `DEFAULT_NAMA_DEKAN` | Nama dekan default di transkrip                 |
+
+## Stack
+
+- **Python 3.11 / Django 5.2**
+- **SQLite** (`artifacts/transkrip-app/db.sqlite3`)
+- **openpyxl** — baca/tulis Excel
+- **python-dotenv** — env management
+
+## Struktur Utama
 
 ```
 artifacts/transkrip-app/
-├── core/               # Django app utama (models, views, services)
-├── transkrip_project/  # Settings & URL config Django
-├── templates/          # HTML templates
-├── static/             # Static files (CSS, JS)
-├── media/              # Upload files (template Excel) — tidak di-git
-├── db.sqlite3          # Database SQLite
-├── requirements.txt    # Python dependencies
-└── run.sh              # Entry point
+├── core/
+│   ├── models.py        ← Semua model database
+│   ├── views.py         ← Dashboard, generate, riwayat
+│   ├── admin.py         ← Admin + upload kurikulum
+│   └── services/
+│       ├── feeder.py    ← Integrasi Neo Feeder
+│       ├── matching.py  ← Algoritma pencocokan MK
+│       └── excel_gen.py ← Generate output Excel
+├── transkrip_project/settings.py
+├── run.sh
+└── requirements.txt
 ```
 
-## Fitur Utama
+## Halaman Utama
 
-- **Generate Single**: Buat transkrip satu mahasiswa berdasarkan NIM
-- **Generate Batch**: Upload daftar NIM, generate massal
-- **Riwayat**: Log semua generate dengan filter
-- **Django Admin** (`/admin/`): Setup kurikulum, template Excel, predikat kelulusan
+| URL        | Fungsi                        |
+|------------|-------------------------------|
+| `/`        | Generate transkrip single NIM |
+| `/batch/`  | Generate batch dari file      |
+| `/riwayat/`| Riwayat generate              |
+| `/admin/`  | Admin Django (data master)    |
+| `/login/`  | Halaman login                 |
 
-## Catatan
-
-- Neo Feeder harus terhubung ke jaringan intranet/VPN kampus
-- Aplikasi tetap bisa diakses tanpa Feeder; hanya fitur generate yang tidak aktif
-- Token Feeder di-cache in-memory, auto-refresh 5 menit sebelum expired
+## User Preferences

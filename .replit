@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "python-3.11"]
+modules = ["nodejs-20", "python-3.11", "web"]
 
 [deployment]
 router = "application"
@@ -7,8 +7,6 @@ deploymentTarget = "autoscale"
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
-
-[workflows]
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -26,7 +24,27 @@ channel = "stable-25_05"
 [userenv.shared]
 DEBUG = "True"
 DEFAULT_NAMA_DEKAN = "Nama Dekan"
-FEEDER_HOST = "82.41.42.150"
-FEEDER_USERNAME = "rroyani887@gmail.com"
-ALLOWED_HOSTS = "*"
-CSRF_TRUSTED_ORIGINS = "https://*.replit.dev,https://*.replit.app,http://localhost:*"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd artifacts/transkrip-app && PORT=23524 bash run.sh"
+waitForPort = 23524

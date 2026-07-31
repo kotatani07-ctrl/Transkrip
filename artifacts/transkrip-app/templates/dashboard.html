@@ -3,32 +3,16 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<!-- Status bar konfigurasi -->
-{% if not feeder_configured %}
-<div class="alert alert-warning d-flex align-items-center gap-2 mb-4 py-2" role="alert">
-  <i class="bi bi-exclamation-triangle-fill"></i>
-  <div>
-    <strong>Konfigurasi Neo Feeder belum lengkap.</strong>
-    Salin <code>.env.example</code> ke <code>.env</code> dan isi <code>FEEDER_HOST</code>,
-    <code>FEEDER_USERNAME</code>, <code>FEEDER_PASSWORD</code>.
-  </div>
-</div>
-{% elif not feeder_connected %}
-<div class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2" role="alert">
-  <i class="bi bi-x-circle-fill"></i>
-  <div>
-    <strong>Neo Feeder tidak terhubung.</strong>
-    {% if feeder_connection_error %}
-      {{ feeder_connection_error }}
-    {% else %}
-      Periksa ulang FEEDER_HOST, username, password, dan pastikan server Feeder aktif.
-    {% endif %}
-  </div>
-</div>
-{% else %}
+<!-- Status bar koneksi Feeder (dicek nyata setiap 60 detik) -->
+{% if feeder_ok %}
 <div class="alert alert-success d-flex align-items-center gap-2 mb-4 py-2" role="alert">
   <i class="bi bi-check-circle-fill"></i>
-  <div>Terhubung ke Neo Feeder: <strong>{{ feeder_host }}</strong></div>
+  <div>Terhubung ke Neo Feeder: <strong>{{ feeder_msg }}</strong></div>
+</div>
+{% else %}
+<div class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2" role="alert">
+  <i class="bi bi-x-circle-fill"></i>
+  <div><strong>Tidak terhubung ke Neo Feeder.</strong> {{ feeder_msg }}</div>
 </div>
 {% endif %}
 
