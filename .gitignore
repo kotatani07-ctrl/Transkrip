@@ -77,4 +77,3 @@ venv/
 # Django
 media/
 staticfiles/
-artifacts/transkrip-app/db.sqlite3
