@@ -156,11 +156,17 @@ def dashboard(request):
     riwayat_terakhir = RiwayatGenerate.objects.select_related('generated_by').order_by('-generated_at')[:10]
 
     # Cek konfigurasi Feeder
+    feeder_host = getattr(settings, 'FEEDER_HOST', '')
     feeder_configured = bool(
-        getattr(settings, 'FEEDER_HOST', '') and
+        feeder_host and
         getattr(settings, 'FEEDER_USERNAME', '') and
         getattr(settings, 'FEEDER_PASSWORD', '')
     )
+
+    feeder_connected = False
+    feeder_connection_error = ''
+    if feeder_configured:
+        feeder_connected, feeder_connection_error = feeder_service.check_feeder_connection()
 
     context = {
         'total_kurikulum': total_kurikulum,
@@ -168,7 +174,9 @@ def dashboard(request):
         'total_riwayat': total_riwayat,
         'riwayat_terakhir': riwayat_terakhir,
         'feeder_configured': feeder_configured,
-        'feeder_host': getattr(settings, 'FEEDER_HOST', '-'),
+        'feeder_host': feeder_host or '-',
+        'feeder_connected': feeder_connected,
+        'feeder_connection_error': feeder_connection_error,
     }
     return render(request, 'dashboard.html', context)
 

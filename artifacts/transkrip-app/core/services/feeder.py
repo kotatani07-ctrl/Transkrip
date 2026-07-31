@@ -29,6 +29,7 @@ _token_lock = Lock()
 
 BUFFER_MENIT = 5        # refresh token 5 menit sebelum expired
 TIMEOUT_DETIK = 90      # timeout per request ke Feeder
+HEALTH_CHECK_TIMEOUT = 5  # timeout untuk pemeriksaan koneksi singkat
 
 
 def _decode_jwt_payload(token: str) -> dict:
@@ -55,7 +56,7 @@ def _get_feeder_url() -> str:
     return f"http://{host}:3003/ws/live2.php"
 
 
-def _call_feeder(payload: dict) -> dict:
+def _call_feeder(payload: dict, timeout: int | None = None) -> dict:
     """
     Kirim request POST ke endpoint Neo Feeder.
     Return dict response atau raise exception.
@@ -71,7 +72,7 @@ def _call_feeder(payload: dict) -> dict:
             url,
             json=payload,
             headers=headers,
-            timeout=TIMEOUT_DETIK,
+            timeout=timeout if timeout is not None else TIMEOUT_DETIK,
         )
         resp.raise_for_status()
         data = resp.json()
@@ -83,7 +84,7 @@ def _call_feeder(payload: dict) -> dict:
         )
     except requests.exceptions.Timeout:
         raise TimeoutError(
-            f"Koneksi ke Neo Feeder timeout (>{TIMEOUT_DETIK} detik) "
+            f"Koneksi ke Neo Feeder timeout (>{timeout or TIMEOUT_DETIK} detik) "
             f"saat memanggil '{payload.get('act', '?')}'. "
             f"Server mungkin sedang lambat atau endpoint tidak merespons dari jaringan ini."
         )
@@ -91,7 +92,7 @@ def _call_feeder(payload: dict) -> dict:
         raise RuntimeError(f"Error memanggil Neo Feeder '{payload.get('act', '?')}': {e}")
 
 
-def get_token() -> str:
+def get_token(timeout: int = TIMEOUT_DETIK) -> str:
     """
     Ambil token Neo Feeder.
     Gunakan cache; refresh otomatis jika akan expired dalam BUFFER_MENIT menit.
@@ -109,7 +110,7 @@ def get_token() -> str:
             "username": settings.FEEDER_USERNAME,
             "password": settings.FEEDER_PASSWORD,
         }
-        response = _call_feeder(payload)
+        response = _call_feeder(payload, timeout=timeout)
 
         token = None
         if isinstance(response, dict):
@@ -131,6 +132,15 @@ def get_token() -> str:
         _token_cache['exp'] = exp
         logger.info(f"Token berhasil didapat, berlaku hingga: {exp}")
         return token
+
+
+def check_feeder_connection() -> tuple[bool, str]:
+    """Periksa apakah Neo Feeder dapat dijangkau dan memberikan token."""
+    try:
+        get_token(timeout=HEALTH_CHECK_TIMEOUT)
+        return True, ''
+    except Exception as e:
+        return False, str(e)
 
 
 def get_program_mahasiswa(nim: str) -> dict:

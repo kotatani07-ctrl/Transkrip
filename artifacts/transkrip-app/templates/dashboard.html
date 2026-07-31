@@ -13,6 +13,18 @@
     <code>FEEDER_USERNAME</code>, <code>FEEDER_PASSWORD</code>.
   </div>
 </div>
+{% elif not feeder_connected %}
+<div class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2" role="alert">
+  <i class="bi bi-x-circle-fill"></i>
+  <div>
+    <strong>Neo Feeder tidak terhubung.</strong>
+    {% if feeder_connection_error %}
+      {{ feeder_connection_error }}
+    {% else %}
+      Periksa ulang FEEDER_HOST, username, password, dan pastikan server Feeder aktif.
+    {% endif %}
+  </div>
+</div>
 {% else %}
 <div class="alert alert-success d-flex align-items-center gap-2 mb-4 py-2" role="alert">
   <i class="bi bi-check-circle-fill"></i>
